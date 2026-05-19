@@ -1,0 +1,326 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "naam": "Modelling clay",
+      "taric": "2508400000",
+      "invoerrechten": "2508 40 00 00 = 0%",
+      "percentage": "0%",
+      "antidump": false,
+      "hfdst_nr": "25",
+      "hfdst_label": "Zout; zwavel; aarde en steen",
+      "post": "Post 2508: Andere kleien",
+      "gn_code": "GN-code 2508 40: overige kleien",
+      "categorie": "Knutselen & hobby",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 2,
+      "naam": "Waterverf set",
+      "taric": "3213100000",
+      "invoerrechten": "3213 10 00 00 = 6.5%",
+      "percentage": "6.5%",
+      "antidump": false,
+      "hfdst_nr": "32",
+      "hfdst_label": "Kleurstoffen en pigmenten",
+      "post": "Post 3213: Artists' colours",
+      "gn_code": "GN-code 3213 10: Colours in sets",
+      "categorie": "Knutselen & hobby",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 4,
+      "naam": "Geurstokjes",
+      "taric": "3303009000",
+      "invoerrechten": "3303 00 90 00 = 0%",
+      "percentage": "0%",
+      "antidump": false,
+      "hfdst_nr": "33",
+      "hfdst_label": "Essentiële oliën",
+      "post": "Post 3303: Parfums",
+      "gn_code": "GN-code 3303 00: Parfums",
+      "categorie": "Kaarsen & geur",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 6,
+      "naam": "Kaarsstiften",
+      "taric": "3406000000",
+      "invoerrechten": "3406 00 00 00 = 70,90% Antidump",
+      "percentage": "70,90%",
+      "antidump": true,
+      "hfdst_nr": "34",
+      "hfdst_label": "Zeep, kaarsen",
+      "post": "Post 3406: Kaarsen",
+      "gn_code": "GN-code 3406 00: Kaarsen",
+      "categorie": "Kaarsen & geur",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 7,
+      "naam": "Dinerkaarsen",
+      "taric": "3406000000",
+      "invoerrechten": "3406 00 00 00 = 70,90% Antidump",
+      "percentage": "70,90%",
+      "antidump": true,
+      "hfdst_nr": "34",
+      "hfdst_label": "Zeep, kaarsen",
+      "post": "Post 3406: Kaarsen",
+      "gn_code": "GN-code 3406 00: Kaarsen",
+      "categorie": "Kaarsen & geur",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 8,
+      "naam": "Geurkaars",
+      "taric": "3406000000",
+      "invoerrechten": "3406 00 00 00 = 70,90% Antidump",
+      "percentage": "70,90%",
+      "antidump": true,
+      "hfdst_nr": "34",
+      "hfdst_label": "Zeep, kaarsen",
+      "post": "Post 3406: Kaarsen",
+      "gn_code": "GN-code 3406 00: Kaarsen",
+      "categorie": "Kaarsen & geur",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 31,
+      "naam": "Fotolijst Hout",
+      "taric": "4414900000",
+      "invoerrechten": "4414 90 00 00 = 0%",
+      "percentage": "0%",
+      "antidump": false,
+      "hfdst_nr": "44",
+      "hfdst_label": "Hout en artikelen van hout",
+      "post": "Post 4414: Houten frames",
+      "gn_code": "GN-code 4414 90: Overige",
+      "categorie": "Hout & decoratie",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 32,
+      "naam": "Houten dienblad",
+      "taric": "4419190000",
+      "invoerrechten": "4419 19 00 00 = 0%",
+      "percentage": "0%",
+      "antidump": false,
+      "hfdst_nr": "44",
+      "hfdst_label": "Hout en artikelen van hout",
+      "post": "Post 4419: Houten artikelen",
+      "gn_code": "GN-code 4419 19: Overige",
+      "categorie": "Hout & decoratie",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 54,
+      "naam": "Papierblok",
+      "taric": "4820103000",
+      "invoerrechten": "4820 10 30 00 = 0%",
+      "percentage": "0%",
+      "antidump": false,
+      "hfdst_nr": "48",
+      "hfdst_label": "Papier en karton",
+      "post": "Post 4820: Schrijfblokken",
+      "gn_code": "GN-code 4820 10: Schriften",
+      "categorie": "Papier & drukwerk",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 56,
+      "naam": "Notitieboek",
+      "taric": "4820103000",
+      "invoerrechten": "4820 10 30 00 = 0%",
+      "percentage": "0%",
+      "antidump": false,
+      "hfdst_nr": "48",
+      "hfdst_label": "Papier en karton",
+      "post": "Post 4820: Schrijfblokken",
+      "gn_code": "GN-code 4820 10: Schriften",
+      "categorie": "Papier & drukwerk",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 149,
+      "naam": "Borduur set",
+      "taric": "6308000020",
+      "invoerrechten": "6308 00 00 20 = 12%",
+      "percentage": "12%",
+      "antidump": false,
+      "hfdst_nr": "63",
+      "hfdst_label": "Diverse artikelen van textiel",
+      "post": "Post 6308: Handwerksets",
+      "gn_code": "GN-code 6308 00: Handwerksets",
+      "categorie": "Textiel & mode",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 156,
+      "naam": "Sokken",
+      "taric": "6115950000",
+      "invoerrechten": "6115 95 00 00 = 12%",
+      "percentage": "12%",
+      "antidump": false,
+      "hfdst_nr": "61",
+      "hfdst_label": "Gebreide kleding",
+      "post": "Post 6115: Sokken",
+      "gn_code": "GN-code 6115 95: Sokken synthetisch",
+      "categorie": "Textiel & mode",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 167,
+      "naam": "Snoeppot - Glas",
+      "taric": "7010901000",
+      "invoerrechten": "7010 90 10 00 = 5%",
+      "percentage": "5%",
+      "antidump": false,
+      "hfdst_nr": "70",
+      "hfdst_label": "Glas en glaswerk",
+      "post": "Post 7010: Glazen verpakkingen",
+      "gn_code": "GN-code 7010 90: Overige glas",
+      "categorie": "Glas & servies",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 181,
+      "naam": "Cookie cutters",
+      "taric": "7323930090",
+      "invoerrechten": "7323 93 00 90 = 3.2%",
+      "percentage": "3.2%",
+      "antidump": false,
+      "hfdst_nr": "73",
+      "hfdst_label": "Artikelen van ijzer en staal",
+      "post": "Post 7323: Huishoudartikelen staal",
+      "gn_code": "GN-code 7323 93: Keuken rvs",
+      "categorie": "Keuken & huishoud",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 185,
+      "naam": "Knutselscharen",
+      "taric": "8213000000",
+      "invoerrechten": "8213 00 00 00 = 4.2%",
+      "percentage": "4.2%",
+      "antidump": false,
+      "hfdst_nr": "82",
+      "hfdst_label": "Handgereedschap",
+      "post": "Post 8213: Scharen",
+      "gn_code": "GN-code 8213 00: Scharen",
+      "categorie": "Keuken & huishoud",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 199,
+      "naam": "Loopfiets/Step",
+      "taric": "9503001000",
+      "invoerrechten": "9503 00 10 00 = 0%",
+      "percentage": "0%",
+      "antidump": false,
+      "hfdst_nr": "95",
+      "hfdst_label": "Speelgoed en spellen",
+      "post": "Post 9503: Speelgoed voertuigen",
+      "gn_code": "GN-code 9503 00 10: Stepjes",
+      "categorie": "Speelgoed & spellen",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 202,
+      "naam": "Knuffel",
+      "taric": "9503004100",
+      "invoerrechten": "9503 00 41 00 = 4.7%",
+      "percentage": "4.7%",
+      "antidump": false,
+      "hfdst_nr": "95",
+      "hfdst_label": "Speelgoed en spellen",
+      "post": "Post 9503: Speelgoed",
+      "gn_code": "GN-code 9503 00 41: Speelgoed",
+      "categorie": "Speelgoed & spellen",
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    },
+    {
+      "id": 1777628643931,
+      "naam": "Diamond painting knutsel items (algemeen)",
+      "taric": "9503007000",
+      "percentage": "4.7%",
+      "invoerrechten": "9503 00 70 00 = 4.7%",
+      "hfdst_nr": "95",
+      "hfdst_label": "Speelgoed en spellen",
+      "post": "Post 9503: Speelgoed",
+      "gn_code": "GN-code 9503 0070: andere",
+      "categorie": "Knutselen & hobby",
+      "antidump": false,
+      "_gewijzigd_door": "Agostino",
+      "_gewijzigd_op": "2026-05-19"
+    }
+  ],
+  "categories": [
+    {
+      "n": "Alle producten",
+      "i": "📋"
+    },
+    {
+      "n": "Kaarsen & geur",
+      "i": "🕯️"
+    },
+    {
+      "n": "Papier & drukwerk",
+      "i": "📄"
+    },
+    {
+      "n": "Knutselen & hobby",
+      "i": "🎨"
+    },
+    {
+      "n": "Hout & decoratie",
+      "i": "🪵"
+    },
+    {
+      "n": "Glas & servies",
+      "i": "🥂"
+    },
+    {
+      "n": "Textiel & mode",
+      "i": "🧵"
+    },
+    {
+      "n": "Speelgoed & spellen",
+      "i": "🎁"
+    },
+    {
+      "n": "Keuken & huishoud",
+      "i": "🍴"
+    },
+    {
+      "n": "Elektronica & overig",
+      "i": "⚡"
+    },
+    {
+      "n": "Overig",
+      "i": "📦"
+    },
+    {
+      "n": "Keramische producten",
+      "i": "🍽️"
+    }
+  ],
+  "bijgewerkt": "2026-05-19T10:16:01.174Z",
+  "door": "Agostino"
+}
