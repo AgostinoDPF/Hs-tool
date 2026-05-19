@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DP Factory — HS Code Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--or:#E8783A;--sa:#F0A07A;--nv:#1A3A6B;--bl:#2B7EC1;--lb:#7BB8D4;--pa:#C8DFF0;--bg:#F4F7FB;--wh:#fff;--tx:#1C2B3A;--mu:#6B7A8D;--bo:#D8E4F0;--gn:#155E30;--gnb:#EAF7EF;--wn:#7A3A00;--wnb:#FFF3EA;--rd:#881A1A;--rdb:#FFEBEB;--f:'DM Sans',system-ui,sans-serif;--fm:'DM Mono',monospace}
+html,body{height:100%;background:var(--bg);font-family:var(--f);color:var(--tx);font-size:13px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{background:var(--nv);padding:0 20px;display:flex;align-items:center;gap:14px;height:58px;flex-shrink:0}
+.lm{display:flex;gap:3px;align-items:flex-end;height:30px}
+.lb2{border-radius:2px 2px 0 0}
+.lt{display:flex;flex-direction:column;line-height:1}
+.ld2{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:1px}
+.lf{font-size:17px;font-weight:700;color:#fff;letter-spacing:.5px}
+.lg{font-size:6.5px;letter-spacing:1.5px;color:var(--sa);text-transform:uppercase;margin-top:2px}
+.tbr{margin-left:auto;display:flex;gap:6px;align-items:center}
+.nb{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.85);padding:5px 14px;border-radius:20px;font-size:12px;font-family:var(--f);cursor:pointer;font-weight:500;transition:background .15s}
+.nb:hover{background:rgba(255,255,255,.2)}
+.nb.a{background:var(--or);border-color:var(--or);color:#fff}
+.stripe{height:4px;display:flex;flex-shrink:0}
+.s1{background:var(--or);flex:3}.s2{background:var(--bl);flex:4}.s3{background:var(--lb);flex:3}.s4{background:var(--pa);flex:2}
+.pane{display:none;flex:1;overflow:hidden}.pane.a{display:flex;flex-direction:column}
+#padd.a,#psetup.a{display:block;overflow-y:auto}
+/* SYNC BADGE */
+.sync-badge{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;white-space:nowrap}
+.sync-badge:hover{background:rgba(255,255,255,.1)}
+.sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sync-dot.ok{background:#4ADE80}
+.sync-dot.warn{background:#FACC15;animation:pulse 1.5s infinite}
+.sync-dot.err{background:#F87171}
+.sync-dot.spin{background:var(--lb);animation:spin-dot 1s linear infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin-dot{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+/* MAIN */
+.main{flex:1;display:flex;overflow:hidden}
+.sb{width:255px;background:var(--wh);border-right:1px solid var(--bo);display:flex;flex-direction:column;flex-shrink:0}
+.sbh{padding:12px 14px;border-bottom:1px solid var(--bo)}
+.sbh input{width:100%;padding:7px 11px;border:1px solid var(--bo);border-radius:8px;font-family:var(--f);font-size:13px;color:var(--tx);background:var(--bg);outline:none}
+.sbh input:focus{border-color:var(--bl)}
+.catlist{flex:1;overflow-y:auto}
+.ci{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bo);transition:background .1s;user-select:none;position:relative}
+.ci:hover{background:var(--bg)}.ci.a{background:#E3EEFF;border-left:3px solid var(--bl)}
+.ci-ico{font-size:17px;width:24px;text-align:center;flex-shrink:0}
+.ci-nm{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-ct{font-size:11px;color:var(--mu);background:var(--bg);padding:2px 6px;border-radius:10px;font-weight:600;flex-shrink:0}
+.ci.a .ci-ct{background:var(--pa);color:var(--nv)}
+.ci-del{display:none;background:none;border:none;color:var(--rd);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0}
+.ci:hover .ci-del{display:block}
+.sb-add{padding:10px 12px;border-top:1px solid var(--bo);display:flex;gap:6px}
+.sb-add input{flex:1;padding:6px 9px;border:1px solid var(--bo);border-radius:7px;font-family:var(--f);font-size:12px;color:var(--tx);background:var(--bg);outline:none}
+.sb-add input:focus{border-color:var(--bl)}
+.sb-add button{background:var(--or);color:#fff;border:none;padding:6px 10px;border-radius:7px;font-size:12px;font-family:var(--f);font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.sbf{padding:8px 14px;border-top:1px solid var(--bo);font-size:11px;color:var(--mu);text-align:center}
+.ctr{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.cth{display:grid;grid-template-columns:1fr 155px 110px;padding:7px 14px;background:var(--nv);font-size:10px;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.6px;text-transform:uppercase;flex-shrink:0}
+.ctt{padding:9px 14px;border-bottom:1px solid var(--bo);display:flex;align-items:center;gap:8px;background:var(--wh);flex-shrink:0}
+.ctt-t{font-size:13px;font-weight:600;color:var(--nv)}
+.ctt-c{font-size:12px;color:var(--mu)}
+.pl{flex:1;overflow-y:auto}
+.pr{display:grid;grid-template-columns:1fr 155px 110px;padding:10px 14px;border-bottom:1px solid var(--bo);cursor:pointer;align-items:center;transition:background .1s}
+.pr:hover{background:#EEF5FF}.pr.a{background:#E3EEFF;border-left:3px solid var(--bl)}
+.pr-nm{font-size:13px;font-weight:500;color:var(--tx)}
+.pr-tr{font-size:10px;font-family:var(--fm);color:var(--mu);margin-top:1px}
+.pr-cb{font-size:10px;color:var(--bl);background:#E3EEFF;padding:2px 7px;border-radius:10px;width:fit-content;font-weight:500;white-space:nowrap}
+.pb{font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px}
+.p0{background:#EAF7EF;color:#155E30}.pl2{background:#FFFAEB;color:#7A5500}.pm{background:#FFF3EA;color:#8A4000}.ph{background:#FFEBEB;color:#881A1A}.pa2{background:#F0EBFF;color:#4A1A8A}
+.empty{padding:36px;text-align:center;color:var(--mu)}
+/* DETAIL */
+.dc{width:360px;background:var(--wh);border-left:1px solid var(--bo);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;transition:width .2s}
+.dc.h{width:0;overflow:hidden;border:none}
+.dh{background:var(--nv);padding:13px 14px;display:flex;align-items:flex-start;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:10}
+.dico{width:34px;height:34px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:1px}
+.dtitle{font-size:14px;font-weight:700;color:#fff;line-height:1.3}
+.dsub{font-size:10px;color:var(--pa);margin-top:2px}
+.dact{margin-left:auto;display:flex;gap:5px;flex-shrink:0}
+.btn-ed{background:var(--or);border:none;color:#fff;padding:5px 11px;border-radius:6px;font-size:11px;font-family:var(--f);font-weight:600;cursor:pointer}
+.btn-ed:hover{opacity:.85}
+.btn-x{background:rgba(255,255,255,.12);border:none;color:#fff;width:25px;height:25px;border-radius:50%;cursor:pointer;font-size:14px;font-family:var(--f)}
+.btn-x:hover{background:rgba(255,255,255,.22)}
+.db{padding:14px}
+.sec{margin-bottom:14px}
+.st{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--bl);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.st::before{content:'';display:block;width:3px;height:10px;background:var(--bl);border-radius:2px}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.cb2{background:var(--bg);border:1px solid var(--bo);border-radius:7px;padding:8px 10px}
+.cb-l{font-size:9px;color:var(--mu);margin-bottom:3px;font-weight:500}
+.cb-v{font-size:12px;font-family:var(--fm);font-weight:700;color:var(--nv)}
+.cb-d{font-size:9.5px;color:var(--mu);margin-top:2px;line-height:1.35}
+.tbox{background:var(--bg);border:1px solid var(--bo);border-radius:7px;padding:11px;display:flex;align-items:center;gap:11px;margin-bottom:7px}
+.tpct{font-size:24px;font-weight:700;min-width:50px}
+.tl{font-size:9px;color:var(--mu);font-weight:500}
+.td{font-size:11px;color:var(--tx);margin-top:2px;line-height:1.4}
+.abox{background:var(--wnb);border:1px solid #F0C0A0;border-radius:7px;padding:9px 11px;display:none}
+.abox.s{display:flex;gap:7px;align-items:flex-start}
+.aico{font-size:13px;flex-shrink:0}
+.at2{font-size:11px;font-weight:700;color:var(--wn);margin-bottom:2px}
+.ad{font-size:10px;color:var(--wn);line-height:1.4}
+.hg{display:flex;flex-direction:column;gap:5px}
+.hc{background:var(--bg);border:1px solid var(--bo);border-radius:7px;padding:8px 10px}
+.hq{font-size:11px;font-weight:600;color:var(--nv);margin-bottom:2px}
+.ha{font-size:10px;color:var(--mu);line-height:1.4}
+.sw{display:flex;flex-direction:column;gap:4px}
+.si{display:flex;align-items:center;gap:7px;padding:7px 9px;background:var(--bg);border-radius:7px;border:1px solid var(--bo);cursor:pointer}
+.si:hover{background:#E3EEFF;border-color:var(--lb)}
+.si-n{font-size:11px;font-weight:500;flex:1;color:var(--tx)}
+.si-t{font-size:10px;font-family:var(--fm);color:var(--mu)}
+.audit-row{font-size:10px;color:var(--mu);background:var(--bg);border:1px solid var(--bo);border-radius:6px;padding:6px 9px;margin-top:4px}
+/* EDIT */
+.ep{border-top:1px solid var(--bo);padding:13px 14px;background:var(--bg);display:none}
+.ep.o{display:block}
+.ept{font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--or);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.ept::before{content:'';display:block;width:3px;height:10px;background:var(--or);border-radius:2px}
+.fg{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.fg label{font-size:9px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea{font-family:var(--f);font-size:13px;padding:7px 9px;border:1px solid var(--bo);border-radius:7px;background:var(--wh);color:var(--tx);outline:none;width:100%}
+.fg input:focus,.fg select:focus{border-color:var(--bl)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.cbr{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.cbr input[type=checkbox]{accent-color:var(--or);width:14px;height:14px}
+.cbr label{font-size:12px;font-weight:500;cursor:pointer}
+.epb{display:flex;gap:6px;margin-top:9px;padding-top:9px;border-top:1px solid var(--bo);flex-wrap:wrap}
+.bs{background:var(--or);color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:12px;font-family:var(--f);font-weight:600;cursor:pointer}
+.bs:hover{opacity:.85}
+.bd{background:var(--wh);color:var(--rd);border:1px solid #F0B0B0;padding:7px 12px;border-radius:7px;font-size:12px;font-family:var(--f);cursor:pointer}
+.bd:hover{background:var(--rdb)}
+.bc{background:transparent;color:var(--mu);border:1px solid var(--bo);padding:7px 12px;border-radius:7px;font-size:12px;font-family:var(--f);cursor:pointer;margin-left:auto}
+.bc:hover{background:var(--wh)}
+.toast{font-size:11px;font-weight:600;padding:6px 10px;border-radius:7px;margin-top:7px;display:none}
+.tok{display:block;background:var(--gnb);color:var(--gn);border:1px solid #A0D4B5}
+.ter{display:block;background:var(--rdb);color:var(--rd);border:1px solid #F0B0B0}
+/* ADD */
+.aw{padding:20px;max-width:700px;margin:0 auto}
+.abox2{background:var(--wh);border-radius:10px;border:1px solid var(--bo);overflow:hidden;margin-bottom:14px}
+.abh{background:var(--nv);padding:9px 14px;font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
+.abg{background:var(--or);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.abb{padding:14px}
+.gr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+textarea{font-family:var(--f);font-size:13px;padding:7px 10px;border:1px solid var(--bo);border-radius:7px;background:var(--wh);color:var(--tx);outline:none;resize:none;width:100%}
+textarea:focus{border-color:var(--bl)}
+.airun{background:var(--bl);color:#fff;border:none;padding:7px 15px;border-radius:7px;font-size:13px;font-family:var(--f);font-weight:600;cursor:pointer;margin-top:7px}
+.airun:hover{opacity:.85}.airun:disabled{opacity:.45;cursor:default}
+.air{margin-top:10px;background:var(--bg);border:1px solid var(--bo);border-radius:8px;padding:10px;display:none}
+.air.s{display:block}
+.addbtn{background:var(--or);color:#fff;border:none;padding:7px 18px;border-radius:7px;font-size:13px;font-family:var(--f);font-weight:600;cursor:pointer}
+.addbtn:hover{opacity:.85}
+.rstbtn{background:transparent;color:var(--mu);border:1px solid var(--bo);padding:7px 13px;border-radius:7px;font-size:13px;font-family:var(--f);cursor:pointer}
+.tac-wrap{position:relative}
+.tac-drop{position:absolute;top:100%;left:0;right:0;background:var(--wh);border:1px solid var(--bl);border-radius:0 0 8px 8px;z-index:100;max-height:180px;overflow-y:auto;display:none;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.tac-drop.s{display:block}
+.tac-item{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--bo);font-size:12px}
+.tac-item:last-child{border-bottom:none}
+.tac-item:hover{background:#EEF5FF}
+.tac-item strong{color:var(--nv);font-family:var(--fm)}
+.tac-item span{color:var(--mu);margin-left:6px}
+.tac-fill{background:#EAF7EF;border:1px solid #A0D4B5;border-radius:7px;padding:8px 10px;font-size:12px;color:var(--gn);margin-top:6px;display:none}
+.tac-fill.s{display:block}
+.info-row{background:#E3EEFF;border:1px solid var(--lb);border-radius:7px;padding:8px 10px;font-size:12px;color:var(--nv);margin-bottom:8px;display:none}
+.info-row.s{display:block}
+.read-only-banner{background:#FFF3EA;border:1px solid #F0C080;border-radius:7px;padding:7px 11px;font-size:11px;color:var(--wn);display:none;align-items:center;gap:6px;margin:0 14px 8px}
+.read-only-banner.s{display:flex}
+.ld::after{content:'...';animation:ld 1.2s steps(3,end) infinite}
+@keyframes ld{0%,100%{content:'.'}33%{content:'..'}66%{content:'...'}}
+/* SETUP */
+.setup-wrap{padding:24px;max-width:680px;margin:0 auto}
+.setup-card{background:var(--wh);border:1px solid var(--bo);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.setup-head{background:var(--nv);padding:12px 16px;font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
+.setup-body{padding:16px}
+.setup-step{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
+.step-nr{width:26px;height:26px;background:var(--bl);border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body{flex:1}
+.step-title{font-size:13px;font-weight:600;color:var(--nv);margin-bottom:5px}
+.step-desc{font-size:12px;color:var(--mu);line-height:1.6}
+.step-desc code{background:var(--bg);border:1px solid var(--bo);border-radius:4px;padding:1px 6px;font-family:var(--fm);font-size:11px;color:var(--nv)}
+.step-img{background:var(--bg);border:1px solid var(--bo);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--mu);line-height:1.6}
+.step-img strong{color:var(--nv)}
+.setup-fg{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.setup-fg label{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.setup-fg input{font-family:var(--f);font-size:13px;padding:8px 10px;border:1px solid var(--bo);border-radius:7px;background:var(--bg);color:var(--tx);outline:none;width:100%}
+.setup-fg input:focus{border-color:var(--bl)}
+.setup-note{background:#FFF8E7;border-left:3px solid var(--or);border-radius:0 6px 6px 0;padding:9px 12px;font-size:11px;color:#7A5500;line-height:1.5;margin-top:8px}
+.setup-ok{background:var(--gnb);border-left:3px solid var(--gn);border-radius:0 6px 6px 0;padding:9px 12px;font-size:11px;color:var(--gn);line-height:1.5;margin-top:8px}
+.setup-btn{background:var(--bl);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-family:var(--f);font-weight:600;cursor:pointer;margin-top:4px}
+.setup-btn:hover{opacity:.85}
+.setup-btn.or{background:var(--or)}
+.setup-btn.gn{background:#2E7D5A}
+.test-result{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;display:none;white-space:pre-line;line-height:1.6}
+.test-result.ok{display:block;background:var(--gnb);color:var(--gn);border:1px solid #A0D4B5}
+.test-result.err{display:block;background:var(--rdb);color:var(--rd);border:1px solid #F0B0B0}
+.role-selector{display:flex;gap:8px;margin-top:8px}
+.role-btn{flex:1;padding:10px;border:2px solid var(--bo);border-radius:8px;background:var(--wh);cursor:pointer;text-align:center;transition:all .15s}
+.role-btn:hover{border-color:var(--lb);background:#F0F7FF}
+.role-btn.a{border-color:var(--bl);background:#E3EEFF}
+.role-btn-icon{font-size:22px;margin-bottom:4px}
+.role-btn-label{font-size:12px;font-weight:600;color:var(--nv)}
+.role-btn-desc{font-size:10px;color:var(--mu);margin-top:2px}
+.link-preview{font-family:var(--fm);font-size:10px;color:var(--mu);background:var(--bg);border:1px solid var(--bo);border-radius:6px;padding:6px 9px;margin-top:6px;word-break:break-all;display:none}
+.link-preview.s{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="topbar">
+  <div class="lm">
+    <div class="lb2" style="width:7px;height:26px;background:#E8783A"></div>
+    <div class="lb2" style="width:7px;height:20px;background:#F0A07A"></div>
+    <div class="lb2" style="width:7px;height:30px;background:#2B7EC1"></div>
+    <div class="lb2" style="width:7px;height:24px;background:#7BB8D4"></div>
+    <div class="lb2" style="width:7px;height:18px;background:#C8DFF0"></div>
+  </div>
+  <div class="lt">
+    <span class="ld2">Dynamic Products</span>
+    <span class="lf">FACTORY</span>
+    <span class="lg">Where Inspiration Meets Creation</span>
+  </div>
+  <div class="tbr">
+    <div class="sync-badge" id="syncBadge" onclick="tab('psetup',document.getElementById('nbsetup'))" title="Klik voor synchronisatie-instellingen">
+      <div class="sync-dot warn" id="syncDot"></div>
+      <span id="syncLabel">Niet verbonden</span>
+    </div>
+    <button class="nb a" id="nbzoek" onclick="tab('pzoek',this)">Zoeken</button>
+    <button class="nb" id="nbadd" onclick="tab('padd',this)">+ Toevoegen</button>
+    <button class="nb" id="nbsetup" onclick="tab('psetup',this)">⚙ Instellingen</button>
+    <button class="nb" onclick="exportHTML()" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)" title="Download HTML backup">⬇ Export</button>
+  </div>
+</div>
+<div class="stripe"><div class="s1"></div><div class="s2"></div><div class="s3"></div><div class="s4"></div></div>
+
+<!-- ZOEKEN -->
+<div class="pane a" id="pzoek">
+<div class="main">
+  <div class="sb">
+    <div class="sbh"><input id="si" placeholder="Zoek product of TARIC..." oninput="renderList()"></div>
+    <div class="catlist" id="catlist"></div>
+    <div class="sb-add" id="sb-add-row">
+      <input id="newcat-ico" placeholder="🏷️" style="width:38px;flex:none">
+      <input id="newcat-nm" placeholder="Nieuwe categorie...">
+      <button onclick="addCat()">+</button>
+    </div>
+    <div class="sbf" id="sbf">Laden...</div>
+  </div>
+  <div class="ctr">
+    <div class="cth"><div>Artikel</div><div>Categorie</div><div>Invoerrechten</div></div>
+    <div class="ctt">
+      <span class="ctt-t" id="ctit">Alle producten</span>
+      <span class="ctt-c" id="cct"></span>
+      <button onclick="syncFromOneDrive(false)" style="margin-left:auto;background:none;border:1px solid var(--bo);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--mu);cursor:pointer;font-family:var(--f)" title="Handmatige sync">↻ Vernieuwen</button>
+      <span id="lastSyncTime" style="font-size:10px;color:var(--mu);margin-left:6px"></span>
+    </div>
+    <div class="read-only-banner" id="roeBanner">
+      <span>👁️</span><span>Leesmodus — alleen logistiek kan wijzigingen opslaan</span>
+    </div>
+    <div class="pl" id="pl"><div class="empty">Laden...</div></div>
+  </div>
+  <div class="dc h" id="dc">
+    <div class="dh">
+      <div class="dico" id="dico">📦</div>
+      <div style="flex:1;min-width:0">
+        <div class="dtitle" id="dnaam">—</div>
+        <div class="dsub" id="dsub">—</div>
+      </div>
+      <div class="dact">
+        <button class="btn-ed" id="btnEdit" onclick="toggleEdit()">Bewerken</button>
+        <button class="btn-x" onclick="closeDetail()">✕</button>
+      </div>
+    </div>
+    <div class="db">
+      <div class="sec">
+        <div class="st">Tariefindeling</div>
+        <div class="cg">
+          <div class="cb2"><div class="cb-l">Hoofdstuk</div><div class="cb-v" id="dhn" style="font-size:20px">—</div><div class="cb-d" id="dhl">—</div></div>
+          <div class="cb2"><div class="cb-l">Post (4 cijfers)</div><div class="cb-v" id="dpc">—</div><div class="cb-d" id="dpd">—</div></div>
+          <div class="cb2"><div class="cb-l">GN-code (8 cijfers)</div><div class="cb-v" id="dgc">—</div><div class="cb-d" id="dgd">—</div></div>
+          <div class="cb2"><div class="cb-l">TARIC (10 cijfers)</div><div class="cb-v" id="dtc">—</div><div class="cb-d">Volledige EU-douanecode</div></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="st">Invoerrechten</div>
+        <div class="tbox"><div class="tpct" id="dpct">—</div><div><div class="tl">Heffing bij invoer vanuit China</div><div class="td" id="dinv">—</div></div></div>
+        <div class="abox" id="dabox">
+          <div class="aico">⚠️</div>
+          <div><div class="at2">Antidumpingrechten van toepassing</div><div class="ad">Basisrecht 0%, totale antidumping-heffing: <strong id="dapct">—</strong>. Verifieer via DTV Douane.</div></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="st">Uitleg codes</div>
+        <div class="hg">
+          <div class="hc"><div class="hq">Hoofdstuk (2 cijfers)</div><div class="ha">Groepeert producten op materiaal of gebruik. Bijv. 44 = hout, 95 = speelgoed.</div></div>
+          <div class="hc"><div class="hq">Post (4 cijfers)</div><div class="ha">Verfijnt het producttype. Bepaalt de basisclassificatie bij de Douane.</div></div>
+          <div class="hc"><div class="hq">TARIC-code (10 cijfers)</div><div class="ha">Verplicht op de douaneaangifte. Bepaalt het exacte invoerrechtenpercentage.</div></div>
+        </div>
+      </div>
+      <div class="sec" id="auditsec" style="display:none">
+        <div class="st">Wijzigingshistorie</div>
+        <div class="audit-row" id="daudit">—</div>
+      </div>
+      <div class="sec" id="simsec" style="display:none">
+        <div class="st">Vergelijkbare producten (zelfde TARIC)</div>
+        <div class="sw" id="dsim"></div>
+      </div>
+    </div>
+    <div class="ep" id="ep">
+      <div class="ept">Gegevens aanpassen</div>
+      <div class="fg"><label>Artikelomschrijving</label><input id="enaam"></div>
+      <div class="fg2">
+        <div class="fg"><label>TARIC-code</label><input id="etaric"></div>
+        <div class="fg"><label>Invoerrechten %</label><input id="epct"></div>
+      </div>
+      <div class="fg"><label>Invoerrechten omschrijving</label><input id="einv"></div>
+      <div class="fg2">
+        <div class="fg"><label>Hoofdstuk nr.</label><input id="ehnr"></div>
+        <div class="fg"><label>Hoofdstuk omschrijving</label><input id="ehl"></div>
+      </div>
+      <div class="fg"><label>Post omschrijving</label><input id="epost"></div>
+      <div class="fg"><label>GN-code omschrijving</label><input id="egn"></div>
+      <div class="fg"><label>Categorie</label><select id="ecat"></select></div>
+      <div class="cbr"><input type="checkbox" id="eanti"><label for="eanti">Antidumpingrechten van toepassing</label></div>
+      <div class="epb">
+        <button class="bs" onclick="saveEdit()">Opslaan</button>
+        <button class="bd" onclick="delProduct()">Verwijderen</button>
+        <button class="bc" onclick="toggleEdit()">Annuleren</button>
+      </div>
+      <div class="toast" id="etst"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- TOEVOEGEN -->
+<div class="pane" id="padd">
+<div class="aw">
+  <div class="abox2">
+    <div class="abh">AI-suggestie <span class="abg">Claude</span></div>
+    <div class="abb">
+      <label style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Beschrijf het product</label>
+      <textarea id="aidesc" rows="2" placeholder="bijv. houten lepel voor koken, of pen met pluchen eenhoornfiguur voor kinderen"></textarea>
+      <button class="airun" id="aibtn" onclick="doAI()">HS code bepalen</button>
+      <div class="air" id="aires"></div>
+    </div>
+  </div>
+  <div class="abox2">
+    <div class="abh">Nieuw product toevoegen</div>
+    <div class="abb">
+      <div class="fg">
+        <label>TARIC-code — vul in en de rest wordt automatisch overgenomen</label>
+        <div class="tac-wrap">
+          <input id="ftaric" placeholder="bijv. 9503004100" oninput="onTaricInput()" onblur="hideDrop()" autocomplete="off" style="font-family:var(--fm);font-size:13px;padding:7px 9px;border:1px solid var(--bo);border-radius:7px;background:var(--wh);color:var(--tx);outline:none;width:100%">
+          <div class="tac-drop" id="tacdrop"></div>
+        </div>
+        <div class="tac-fill" id="tacfill"></div>
+      </div>
+      <div class="info-row" id="inforow"></div>
+      <div class="fg"><label>Artikelomschrijving *</label><input id="fnaam" placeholder="bijv. Pen met pluche eenhoorn"></div>
+      <div class="gr">
+        <div class="fg"><label>Invoerrechten %</label><input id="fpct" placeholder="4.7%"></div>
+        <div class="fg"><label>Categorie</label><select id="fcat"></select></div>
+      </div>
+      <div class="fg"><label>Invoerrechten omschrijving</label><input id="finv" placeholder="9503 00 41 00 = 4.7%"></div>
+      <details style="margin-bottom:10px">
+        <summary style="font-size:11px;color:var(--mu);cursor:pointer;user-select:none;padding:4px 0">Geavanceerde velden (automatisch ingevuld via TARIC)</summary>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+          <div class="fg"><label>Hoofdstuk nr.</label><input id="fhnr" placeholder="95"></div>
+          <div class="fg"><label>Hoofdstuk omschrijving</label><input id="fhl"></div>
+          <div class="fg"><label>Post omschrijving</label><input id="fpost"></div>
+          <div class="fg"><label>GN-code omschrijving</label><input id="fgn"></div>
+        </div>
+      </details>
+      <div class="cbr" style="margin-bottom:12px"><input type="checkbox" id="fanti" style="accent-color:var(--or);width:14px;height:14px"><label for="fanti" style="font-size:12px;font-weight:500;cursor:pointer">Antidumpingrechten van toepassing</label></div>
+      <div style="display:flex;gap:8px">
+        <button class="addbtn" onclick="addProduct()">Product opslaan</button>
+        <button class="rstbtn" onclick="clearAdd()">Wissen</button>
+      </div>
+      <div class="toast" id="ftst"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- INSTELLINGEN -->
+<div class="pane" id="psetup">
+<div class="setup-wrap">
+
+  <div class="setup-card">
+    <div class="setup-head">🔗 OneDrive koppelen — geen Azure nodig</div>
+    <div class="setup-body">
+      <p style="font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.6">
+        Koppel de tool aan een Excel-bestand op OneDrive via een deellink. <strong>Geen IT, geen Azure, geen wachtwoorden</strong> — alleen een OneDrive-link plakken.
+      </p>
+
+      <div class="setup-step">
+        <div class="step-nr">1</div>
+        <div class="step-body">
+          <div class="step-title">Maak een Excel-bestand aan op OneDrive</div>
+          <div class="step-desc">
+            Ga naar <code>onedrive.com</code> → klik <strong>+ Nieuw</strong> → <strong>Excel-werkmap</strong>.<br>
+            Noem het bestand bijv. <code>hs_codes.xlsx</code>.<br>
+            Hernoem het eerste tabblad naar <code>HS Codes</code> (dubbelklik op de tabnaam onderaan).<br>
+            <strong>Laat het bestand leeg</strong> — de tool vult het zelf in.
+          </div>
+          <div class="step-img">
+            📁 <strong>Tip:</strong> Zet het bestand in een gedeelde Teams-map zodat logistiek er altijd bij kan, ook als jij afwezig bent.
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-nr">2</div>
+        <div class="step-body">
+          <div class="step-title">Maak een deellink aan — "Kan bewerken"</div>
+          <div class="step-desc">
+            Open het Excel-bestand op OneDrive.<br>
+            Klik rechtsboven op <strong>Delen</strong> (of het deelicoon).<br>
+            Kies: <strong>Iedereen met de link kan bewerken</strong>.<br>
+            Klik <strong>Koppeling kopiëren</strong>.<br>
+          </div>
+          <div class="step-img">
+            ⚠️ <strong>Let op:</strong> Kies "Kan bewerken", niet "Kan weergeven" — anders kan de tool geen wijzigingen opslaan.<br><br>
+            🔒 <strong>Over beveiliging:</strong> De link werkt alleen voor dit specifieke Excel-bestand. HS-codes zijn geen gevoelige bedrijfsdata, maar deel de link niet buiten het team.
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-nr">3</div>
+        <div class="step-body">
+          <div class="step-title">Plak de deellink hieronder</div>
+          <div class="setup-fg">
+            <label>OneDrive deellink (begint met https://dpfactory-my.sharepoint.com/... of https://1drv.ms/...)</label>
+            <input id="cfgShareUrl" placeholder="https://dpfactory-my.sharepoint.com/:x:/..." oninput="previewLink()" style="font-family:var(--fm);font-size:12px">
+          </div>
+          <div class="link-preview" id="linkPreview"></div>
+          <div class="setup-fg" style="margin-top:10px">
+            <label>Bladnaam in Excel</label>
+            <input id="cfgSheetName" placeholder="HS Codes" value="HS Codes">
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-nr">4</div>
+        <div class="step-body">
+          <div class="step-title">Jouw naam (voor wijzigingshistorie)</div>
+          <div class="step-desc">Wordt opgeslagen bij elke wijziging — zodat je kunt zien wie wat heeft aangepast.</div>
+          <div class="setup-fg">
+            <label>Jouw naam of e-mailadres</label>
+            <input id="cfgNaam" placeholder="bijv. jan.de.vries@dpfactory.nl">
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-step">
+        <div class="step-nr">5</div>
+        <div class="step-body">
+          <div class="step-title">Jouw rol</div>
+          <div class="step-desc">Logistiek kan bewerken en opslaan naar OneDrive. Sales/management kan alleen raadplegen.</div>
+          <div class="role-selector">
+            <div class="role-btn a" id="roleLogistiek" onclick="setRole('logistiek')">
+              <div class="role-btn-icon">🛠️</div>
+              <div class="role-btn-label">Logistiek / Beheer</div>
+              <div class="role-btn-desc">Toevoegen, bewerken, verwijderen</div>
+            </div>
+            <div class="role-btn" id="roleSales" onclick="setRole('sales')">
+              <div class="role-btn-icon">👁️</div>
+              <div class="role-btn-label">Sales / Management</div>
+              <div class="role-btn-desc">Alleen raadplegen</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+        <button class="setup-btn or" onclick="saveConfig()">Instellingen opslaan</button>
+        <button class="setup-btn" onclick="testConnection()">Verbinding testen</button>
+        <button class="setup-btn gn" onclick="pushToOneDrive()">↑ Data uploaden naar OneDrive</button>
+      </div>
+      <div class="test-result" id="testResult"></div>
+
+      <div class="setup-note" style="margin-top:14px">
+        💡 <strong>Volgorde bij eerste gebruik:</strong> Sla instellingen op → Test verbinding → Upload data naar OneDrive → Deel de deellink met collega's. Klaar.
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-head">📋 Hoe collega's de tool instellen</div>
+    <div class="setup-body">
+      <p style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.6">Stuur collega's dit bericht:</p>
+      <div style="background:var(--bg);border:1px solid var(--bo);border-radius:8px;padding:14px;font-size:12px;color:var(--tx);line-height:1.7" id="shareMsg">
+        Hoi! Hier is de HS Code Tool: <em>[link naar HTML-bestand]</em><br>
+        1. Open de tool en klik op <strong>⚙ Instellingen</strong><br>
+        2. Plak deze deellink in het veld: <em>[jouw OneDrive deellink]</em><br>
+        3. Vul je naam in en kies rol "Sales / Management"<br>
+        4. Klik <strong>Instellingen opslaan</strong> — de tool laadt automatisch de actuele data.
+      </div>
+      <div style="margin-top:10px">
+        <button onclick="kopieerInstructie()" style="background:var(--bl);color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-family:var(--f);font-weight:600;cursor:pointer">📋 Kopieer instructie</button>
+        <span id="kopieertToast" style="font-size:11px;color:var(--gn);margin-left:8px;display:none">✓ Gekopieerd!</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-head">⚡ Automatische synchronisatie</div>
+    <div class="setup-body" style="font-size:12px;color:var(--mu);line-height:1.7">
+      De tool synchroniseert automatisch elke <strong>5 minuten</strong>. De gekleurde stip bovenin toont de status:<br>
+      🟢 Groen = verbonden en actueel &nbsp;|&nbsp; 🟡 Geel = niet verbonden &nbsp;|&nbsp; 🔴 Rood = fout<br><br>
+      Klik op de stip of de knop <strong>↻ Vernieuwen</strong> voor een handmatige sync.
+    </div>
+  </div>
+
+</div>
+</div>
+
+</div>
+<script>
+const SEED=[{"id":1,"naam":"Modelling clay","taric":"2508400000","invoerrechten":"2508 40 00 00 = 0%","percentage":"0%","antidump":false,"hfdst_nr":"25","hfdst_label":"Zout; zwavel; aarde en steen; gips, kalk en cement","post":"Post 2508: Andere kleien","gn_code":"GN-code 2508 40: overige kleien","categorie":"Knutselen & hobby"},{"id":2,"naam":"Waterverf set","taric":"3213100000","invoerrechten":"3213 10 00 00 = 6.5%","percentage":"6.5%","antidump":false,"hfdst_nr":"32","hfdst_label":"Kleurstoffen, pigmenten en andere kleurende stoffen","post":"Post 3213: Artists' colours","gn_code":"GN-code 3213 10: Colours in sets","categorie":"Knutselen & hobby"},{"id":4,"naam":"Geurstokjes","taric":"3303009000","invoerrechten":"3303 00 90 00 = 0%","percentage":"0%","antidump":false,"hfdst_nr":"33","hfdst_label":"Essentiële oliën en parfumeriewaren","post":"Post 3303: Parfums en toiletwaters","gn_code":"GN-code 3303 00: Parfums","categorie":"Kaarsen & geur"},{"id":6,"naam":"Kaarsstiften","taric":"3406000000","invoerrechten":"3406 00 00 00 = 0% + 70,90% Antidump","percentage":"70,90%","antidump":true,"hfdst_nr":"34","hfdst_label":"Zeep, wasmiddelen, kaarsen","post":"Post 3406: Kaarsen","gn_code":"GN-code 3406 00: Kaarsen","categorie":"Kaarsen & geur"},{"id":7,"naam":"Dinerkaarsen","taric":"3406000000","invoerrechten":"3406 00 00 00 = 0% + 70,90% Antidump","percentage":"70,90%","antidump":true,"hfdst_nr":"34","hfdst_label":"Zeep, wasmiddelen, kaarsen","post":"Post 3406: Kaarsen","gn_code":"GN-code 3406 00: Kaarsen","categorie":"Kaarsen & geur"},{"id":8,"naam":"Geurkaars","taric":"3406000000","invoerrechten":"3406 00 00 00 = 0% + 70,90% Antidump","percentage":"70,90%","antidump":true,"hfdst_nr":"34","hfdst_label":"Zeep, wasmiddelen, kaarsen","post":"Post 3406: Kaarsen","gn_code":"GN-code 3406 00: Kaarsen","categorie":"Kaarsen & geur"},{"id":31,"naam":"Fotolijst Hout","taric":"4414900000","invoerrechten":"4414 90 00 00 = 0%","percentage":"0%","antidump":false,"hfdst_nr":"44","hfdst_label":"Hout en artikelen van hout","post":"Post 4414: Houten frames","gn_code":"GN-code 4414 90: Overige","categorie":"Hout & decoratie"},{"id":32,"naam":"Houten dienblad","taric":"4419190000","invoerrechten":"4419 19 00 00 = 0%","percentage":"0%","antidump":false,"hfdst_nr":"44","hfdst_label":"Hout en artikelen van hout","post":"Post 4419: Houten artikelen","gn_code":"GN-code 4419 19: Overige","categorie":"Hout & decoratie"},{"id":54,"naam":"Papierblok","taric":"4820103000","invoerrechten":"4820 10 30 00 = 0%","percentage":"0%","antidump":false,"hfdst_nr":"48","hfdst_label":"Papier en karton","post":"Post 4820: Schrijfblokken","gn_code":"GN-code 4820 10: Schriften","categorie":"Papier & drukwerk"},{"id":56,"naam":"Notitieboek","taric":"4820103000","invoerrechten":"4820 10 30 00 = 0%","percentage":"0%","antidump":false,"hfdst_nr":"48","hfdst_label":"Papier en karton","post":"Post 4820: Schrijfblokken","gn_code":"GN-code 4820 10: Schriften","categorie":"Papier & drukwerk"},{"id":149,"naam":"Borduur set","taric":"6308000020","invoerrechten":"6308 00 00 20 = 12%","percentage":"12%","antidump":false,"hfdst_nr":"63","hfdst_label":"Diverse artikelen van textiel","post":"Post 6308: Handwerksets","gn_code":"GN-code 6308 00: Handwerksets","categorie":"Textiel & mode"},{"id":156,"naam":"Sokken","taric":"6115950000","invoerrechten":"6115 95 00 00 = 12%","percentage":"12%","antidump":false,"hfdst_nr":"61","hfdst_label":"Gebreide kleding","post":"Post 6115: Sokken","gn_code":"GN-code 6115 95: Sokken synthetisch","categorie":"Textiel & mode"},{"id":167,"naam":"Snoeppot - Glas","taric":"7010901000","invoerrechten":"7010 90 10 00 = 5%","percentage":"5%","antidump":false,"hfdst_nr":"70","hfdst_label":"Glas en glaswerk","post":"Post 7010: Glazen verpakkingen","gn_code":"GN-code 7010 90: Overige glas","categorie":"Glas & servies"},{"id":169,"naam":"Long drink glazen","taric":"7013379100","invoerrechten":"7013 37 91 00 = 11%","percentage":"11%","antidump":false,"hfdst_nr":"70","hfdst_label":"Glas en glaswerk","post":"Post 7013: Tafelglas","gn_code":"GN-code 7013 37: Andere tafelglas","categorie":"Glas & servies"},{"id":181,"naam":"Cookie cutters","taric":"7323930090","invoerrechten":"7323 93 00 90 = 3.2%","percentage":"3.2%","antidump":false,"hfdst_nr":"73","hfdst_label":"Artikelen van ijzer en staal","post":"Post 7323: Huishoudartikelen staal","gn_code":"GN-code 7323 93: Keuken rvs","categorie":"Keuken & huishoud"},{"id":185,"naam":"Knutselscharen","taric":"8213000000","invoerrechten":"8213 00 00 00 = 4.2%","percentage":"4.2%","antidump":false,"hfdst_nr":"82","hfdst_label":"Handgereedschap","post":"Post 8213: Scharen","gn_code":"GN-code 8213 00: Scharen","categorie":"Keuken & huishoud"},{"id":196,"naam":"Diamond painting magneten","taric":"8505199089","invoerrechten":"8505 19 90 89 = 2.2%","percentage":"2.2%","antidump":false,"hfdst_nr":"85","hfdst_label":"Elektrisch materiaal","post":"Post 8505: Magneten","gn_code":"GN-code 8505 19: Magneten overig","categorie":"Elektronica & overig"},{"id":199,"naam":"Loopfiets/Step","taric":"9503001000","invoerrechten":"9503 00 10 00 = 0%","percentage":"0%","antidump":false,"hfdst_nr":"95","hfdst_label":"Speelgoed en spellen","post":"Post 9503: Speelgoed voertuigen","gn_code":"GN-code 9503 00 10: Stepjes","categorie":"Speelgoed & spellen"},{"id":202,"naam":"Knuffel","taric":"9503004100","invoerrechten":"9503 00 41 00 = 4.7%","percentage":"4.7%","antidump":false,"hfdst_nr":"95","hfdst_label":"Speelgoed en spellen","post":"Post 9503: Speelgoed","gn_code":"GN-code 9503 00 41: Speelgoed","categorie":"Speelgoed & spellen"},{"id":1777628643931,"naam":"Diamond painting knutsel items (algemeen)","taric":"9503007000","percentage":"4.7%","invoerrechten":"9503 00 70 00 = 4.7%","hfdst_nr":"95","hfdst_label":"Speelgoed en spellen","post":"Post 9503: Speelgoed","gn_code":"GN-code 9503 0070: andere","categorie":"Knutselen & hobby","antidump":false}];
+const KEY='dpf_v6';
+const CKEY='dpf_cats_v6';
+const CFG_KEY='dpf_deellink_cfg';
+const ICO={'25':'🪨','32':'🎨','33':'🌸','34':'🕯️','39':'🧴','40':'🔧','42':'👜','44':'🪵','48':'📄','49':'📚','51':'🧶','55':'🧵','56':'🪢','61':'🧦','63':'🧺','68':'🏺','70':'🥂','71':'💎','73':'⚙️','76':'🥤','82':'✂️','83':'🔩','85':'⚡','94':'💡','95':'🎁'};
+const DEFAULT_CATS=[{n:'Alle producten',i:'📋'},{n:'Kaarsen & geur',i:'🕯️'},{n:'Papier & drukwerk',i:'📄'},{n:'Knutselen & hobby',i:'🎨'},{n:'Hout & decoratie',i:'🪵'},{n:'Glas & servies',i:'🥂'},{n:'Textiel & mode',i:'🧵'},{n:'Speelgoed & spellen',i:'🎁'},{n:'Keuken & huishoud',i:'🍴'},{n:'Elektronica & overig',i:'⚡'},{n:'Overig',i:'📦'},{n:'Keramische producten',i:'🍽️'}];
+
+let db=[],cats=[],sel=null,curCat='Alle producten',editOpen=false;
+let userRole='logistiek';
+let syncInterval=null;
+let cfg={shareUrl:'',sheetName:'HS Codes',gebruikersnaam:''};
+
+// ── CONFIG ──
+function loadConfig(){
+  try{const s=localStorage.getItem(CFG_KEY);if(s)cfg=Object.assign(cfg,JSON.parse(s));}catch(e){}
+  userRole=localStorage.getItem('dpf_role')||'logistiek';
+  document.getElementById('cfgShareUrl').value=cfg.shareUrl||'';
+  document.getElementById('cfgSheetName').value=cfg.sheetName||'HS Codes';
+  document.getElementById('cfgNaam').value=cfg.gebruikersnaam||'';
+  applyRole();
+  if(cfg.shareUrl)previewLink();
+}
+function saveConfig(){
+  cfg.shareUrl=document.getElementById('cfgShareUrl').value.trim();
+  cfg.sheetName=document.getElementById('cfgSheetName').value.trim()||'HS Codes';
+  cfg.gebruikersnaam=document.getElementById('cfgNaam').value.trim();
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+  localStorage.setItem('dpf_role',userRole);
+  showTestResult('✅ Opgeslagen! Verbinding testen...','ok');
+  setTimeout(()=>testConnection(),500);
+}
+function setRole(r){
+  userRole=r;
+  document.getElementById('roleLogistiek').classList.toggle('a',r==='logistiek');
+  document.getElementById('roleSales').classList.toggle('a',r==='sales');
+  applyRole();
+}
+function applyRole(){
+  document.getElementById('roleLogistiek').classList.toggle('a',userRole==='logistiek');
+  document.getElementById('roleSales').classList.toggle('a',userRole==='sales');
+  document.getElementById('roeBanner').classList.toggle('s',userRole==='sales');
+  document.getElementById('btnEdit').style.display=userRole==='sales'?'none':'';
+  document.getElementById('sb-add-row').style.display=userRole==='sales'?'none':'';
+  document.getElementById('nbadd').style.display=userRole==='sales'?'none':'';
+}
+function previewLink(){
+  const v=document.getElementById('cfgShareUrl').value.trim();
+  const el=document.getElementById('linkPreview');
+  if(v.length>10){el.textContent=v;el.className='link-preview s';}
+  else el.className='link-preview';
+}
+
+// ── SYNC VIA DEELLINK ──
+function shareUrlToGraphBase(shareUrl){
+  const encoded=btoa(shareUrl).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  return'https://graph.microsoft.com/v1.0/shares/u!'+encoded;
+}
+
+async function syncFromOneDrive(silent=false){
+  if(!cfg.shareUrl){setSyncStatus('warn','Geen deellink — klik ⚙');return;}
+  setSyncStatus('spin','Synchroniseren...');
+  try{
+    const base=shareUrlToGraphBase(cfg.shareUrl);
+    const ir=await fetch(base+'/driveItem');
+    if(!ir.ok){
+      if(ir.status===401||ir.status===403)throw new Error('Toegang geweigerd. Zorg dat de link op "Kan bewerken" staat.');
+      if(ir.status===404)throw new Error('Link niet gevonden. Controleer of de deellink nog geldig is.');
+      throw new Error('HTTP '+ir.status+' bij ophalen bestand');
+    }
+    const item=await ir.json();
+    const driveId=item.parentReference.driveId;
+    const itemId=item.id;
+    const sheet=encodeURIComponent(cfg.sheetName||'HS Codes');
+    const rr=await fetch(`https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/workbook/worksheets('${sheet}')/usedRange`);
+    if(!rr.ok){
+      if(rr.status===404){
+        setSyncStatus('warn','Blad niet gevonden');
+        if(!silent)showToast('etst','Blad "'+cfg.sheetName+'" niet gevonden. Upload eerst data via ⚙ Instellingen.','ter');
+        return;
+      }
+      throw new Error('HTTP '+rr.status+' bij lezen werkblad');
+    }
+    const data=await rr.json();
+    const rows=data.values;
+    if(!rows||rows.length<2){
+      setSyncStatus('warn','Leeg — upload eerst');
+      if(!silent)showToast('etst','Het Excel-bestand is leeg. Klik "Data uploaden" in Instellingen.','ter');
+      return;
+    }
+    const headers=rows[0];
+    const parsed=rows.slice(1).map(row=>{
+      const o={};headers.forEach((h,i)=>o[h]=row[i]??'');
+      return{id:Number(o.id)||Date.now(),naam:o.naam||'',taric:String(o.taric||'').replace(/\s/g,''),percentage:o.percentage||'',invoerrechten:o.invoerrechten||'',antidump:o.antidump==='TRUE'||o.antidump===true,hfdst_nr:String(o.hfdst_nr||''),hfdst_label:o.hfdst_label||'',post:o.post||'',gn_code:o.gn_code||'',categorie:o.categorie||'Overig',_gewijzigd_door:o.gewijzigd_door||'',_gewijzigd_op:o.gewijzigd_op||''};
+    }).filter(p=>p.naam);
+    db=parsed;saveDBLocal();buildCats();renderList();
+    const now=new Date();
+    document.getElementById('lastSyncTime').textContent=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+    setSyncStatus('ok','OneDrive ✓');
+    if(!silent)showToast('etst','✅ '+db.length+' producten geladen','tok');
+  }catch(e){
+    console.error('Sync',e);
+    setSyncStatus('err','Sync mislukt');
+    if(!silent)showToast('etst','⚠️ '+e.message,'ter');
+  }
+}
+
+async function pushToOneDrive(){
+  if(userRole==='sales'){alert('Alleen logistiek kan opslaan naar OneDrive.');return;}
+  if(!cfg.shareUrl){alert('Geen deellink ingesteld. Ga naar ⚙ Instellingen.');tab('psetup',document.getElementById('nbsetup'));return;}
+  setSyncStatus('spin','Opslaan...');
+  try{
+    const base=shareUrlToGraphBase(cfg.shareUrl);
+    const ir=await fetch(base+'/driveItem');
+    if(!ir.ok)throw new Error('Bestand niet bereikbaar ('+ir.status+'). Controleer de deellink.');
+    const item=await ir.json();
+    const driveId=item.parentReference.driveId;
+    const itemId=item.id;
+    const sheet=encodeURIComponent(cfg.sheetName||'HS Codes');
+    const now=new Date().toISOString().split('T')[0];
+    const wie=cfg.gebruikersnaam||'logistiek';
+    const headers=['id','naam','taric','percentage','invoerrechten','antidump','hfdst_nr','hfdst_label','post','gn_code','categorie','gewijzigd_door','gewijzigd_op'];
+    const rows=[headers,...db.map(p=>[p.id,p.naam,p.taric,p.percentage,p.invoerrechten,p.antidump?'TRUE':'FALSE',p.hfdst_nr,p.hfdst_label,p.post,p.gn_code,p.categorie,p._gewijzigd_door||wie,p._gewijzigd_op||now])];
+    const addr='A1:M'+rows.length;
+    const pu=await fetch(`https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/workbook/worksheets('${sheet}')/range(address='${addr}')`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:rows})});
+    if(!pu.ok){
+      const t=await pu.text();
+      if(pu.status===403)throw new Error('Geen schrijfrechten. Zorg dat de deellink op "Kan bewerken" staat, niet alleen "Kan weergeven".');
+      throw new Error('HTTP '+pu.status+': '+t.substring(0,100));
+    }
+    setSyncStatus('ok','OneDrive ✓');
+    showToast('etst','✅ Opgeslagen ('+db.length+' producten)','tok');
+  }catch(e){
+    console.error('Push',e);
+    setSyncStatus('err','Opslaan mislukt');
+    showToast('etst','⚠️ '+e.message,'ter');
+  }
+}
+
+async function testConnection(){
+  showTestResult('⏳ Verbinding testen...','');
+  if(!cfg.shareUrl){showTestResult('❌ Geen deellink ingevuld.','err');return;}
+  try{
+    const base=shareUrlToGraphBase(cfg.shareUrl);
+    const r=await fetch(base+'/driveItem');
+    if(!r.ok){
+      if(r.status===401||r.status===403)throw new Error('Toegang geweigerd.\n\nZorg dat de deellink is ingesteld op:\n"Iedereen met de link kan bewerken"\n\nNiet: alleen weergeven, niet: specifieke personen.');
+      if(r.status===404)throw new Error('Bestand niet gevonden.\n\nControleer of de deellink nog actief is — ga naar OneDrive, open het bestand en maak een nieuwe deellink.');
+      throw new Error('HTTP '+r.status+' — probeer een nieuwe deellink aan te maken.');
+    }
+    const item=await r.json();
+    showTestResult('✅ Verbinding geslaagd!\n\nBestand: '+item.name+'\nGrootte: '+Math.round((item.size||0)/1024)+' KB\n\nKlik nu op "↑ Data uploaden naar OneDrive" voor de eerste synchronisatie.','ok');
+    setSyncStatus('ok','OneDrive ✓');
+  }catch(e){
+    showTestResult('❌ '+e.message,'err');
+    setSyncStatus('err','Verbinding mislukt');
+  }
+}
+
+function showTestResult(msg,type){
+  const el=document.getElementById('testResult');
+  el.textContent=msg;el.className='test-result'+(type?' '+type:'');
+}
+function setSyncStatus(state,label){
+  document.getElementById('syncDot').className='sync-dot '+state;
+  document.getElementById('syncLabel').textContent=label;
+}
+function startAutoSync(){
+  if(syncInterval)clearInterval(syncInterval);
+  if(cfg.shareUrl){syncFromOneDrive(true);syncInterval=setInterval(()=>syncFromOneDrive(true),5*60*1000);}
+}
+
+// ── LOCAL DB ──
+function loadDB(){
+  try{const r=localStorage.getItem(KEY);db=r?JSON.parse(r):JSON.parse(JSON.stringify(SEED));}catch(e){db=JSON.parse(JSON.stringify(SEED));}
+  try{const c=localStorage.getItem(CKEY);cats=c?JSON.parse(c):JSON.parse(JSON.stringify(DEFAULT_CATS));}catch(e){cats=JSON.parse(JSON.stringify(DEFAULT_CATS));}
+}
+function saveDBLocal(){
+  try{localStorage.setItem(KEY,JSON.stringify(db));localStorage.setItem(CKEY,JSON.stringify(cats));}catch(e){}
+}
+
+// ── UI ──
+function pcls(p,a){
+  if(a)return'pa2';const n=parseFloat(String(p).replace(',','.'));
+  if(isNaN(n)||n===0)return'p0';if(n<=3)return'pl2';if(n<=7)return'pm';return'ph';
+}
+function catIco(name){const c=cats.find(x=>x.n===name);return c?c.i:'📦';}
+function getCatNames(all){return cats.filter(c=>all||c.n!=='Alle producten').map(c=>c.n);}
+function buildCatSelect(id,sel){
+  const el=document.getElementById(id);if(!el)return;
+  el.innerHTML=getCatNames(false).map(n=>`<option${n===sel?' selected':''}>${n}</option>`).join('');
+}
+function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function showToast(id,msg,cls){
+  const t=document.getElementById(id);if(!t)return;
+  t.textContent=msg;t.className='toast '+cls;setTimeout(()=>t.className='toast',3500);
+}
+function buildCats(){
+  const cnt={};db.forEach(p=>{cnt[p.categorie]=(cnt[p.categorie]||0)+1;});
+  document.getElementById('catlist').innerHTML=cats.map(c=>{
+    const n=c.n==='Alle producten'?db.length:(cnt[c.n]||0);
+    const isDel=c.n!=='Alle producten'&&userRole==='logistiek';
+    return`<div class="ci${curCat===c.n?' a':''}" onclick="selCat('${esc(c.n)}',this)">
+      <span class="ci-ico">${c.i}</span><span class="ci-nm">${c.n}</span><span class="ci-ct">${n}</span>
+      ${isDel?`<button class="ci-del" onclick="event.stopPropagation();delCat('${esc(c.n)}')" title="Verwijder">×</button>`:''}
+    </div>`;
+  }).join('');
+  document.getElementById('sbf').textContent=db.length+' producten totaal';
+  buildCatSelect('ecat',null);buildCatSelect('fcat',null);
+}
+function selCat(n,el){
+  curCat=n;
+  document.querySelectorAll('.ci').forEach(e=>e.classList.remove('a'));
+  if(el)el.classList.add('a');
+  document.getElementById('ctit').textContent=n;renderList();
+}
+function addCat(){
+  if(userRole==='sales')return;
+  const nm=document.getElementById('newcat-nm').value.trim();
+  const ico=document.getElementById('newcat-ico').value.trim()||'📦';
+  if(!nm)return;if(cats.find(c=>c.n===nm)){alert('Bestaat al.');return;}
+  cats.push({n:nm,i:ico});saveDBLocal();buildCats();
+  document.getElementById('newcat-nm').value='';document.getElementById('newcat-ico').value='';
+}
+function delCat(name){
+  if(userRole==='sales')return;
+  if(!confirm(`Categorie "${name}" verwijderen?`))return;
+  cats=cats.filter(c=>c.n!==name);
+  db.forEach(p=>{if(p.categorie===name)p.categorie='Overig';});
+  if(curCat===name)curCat='Alle producten';
+  saveDBLocal();buildCats();renderList();
+}
+function renderList(){
+  const q=document.getElementById('si').value.toLowerCase();
+  const f=db.filter(p=>{
+    const mq=!q||(p.naam||'').toLowerCase().includes(q)||(p.taric||'').includes(q)||(p.categorie||'').toLowerCase().includes(q);
+    return mq&&(curCat==='Alle producten'||p.categorie===curCat);
+  });
+  document.getElementById('cct').textContent=f.length+' resultaten';
+  const el=document.getElementById('pl');
+  if(!f.length){el.innerHTML='<div class="empty">Geen producten gevonden.</div>';return;}
+  el.innerHTML=f.slice(0,120).map(p=>`<div class="pr${p.id===sel?' a':''}" onclick="showDetail(${p.id})">
+    <div><div class="pr-nm">${p.naam}</div><div class="pr-tr">${p.taric?p.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4'):''}</div></div>
+    <div><span class="pr-cb">${catIco(p.categorie)} ${p.categorie||'Overig'}</span></div>
+    <div><span class="pb ${pcls(p.percentage,p.antidump)}">${p.antidump?'Anti-dump':p.percentage||'—'}</span></div>
+  </div>`).join('');
+  if(f.length>120)el.innerHTML+=`<div class="empty" style="padding:8px 14px;text-align:left;font-size:12px">+${f.length-120} meer — verfijn zoekopdracht</div>`;
+}
+function showDetail(id){
+  sel=id;if(editOpen){document.getElementById('ep').classList.remove('o');editOpen=false;}
+  const p=db.find(x=>x.id===id);if(!p)return;
+  document.querySelectorAll('.pr').forEach(r=>{const o=r.getAttribute('onclick')||'';r.classList.toggle('a',o.includes('('+id+')'));});
+  document.getElementById('dico').textContent=ICO[p.hfdst_nr]||catIco(p.categorie);
+  document.getElementById('dnaam').textContent=p.naam;
+  document.getElementById('dsub').textContent=catIco(p.categorie)+' '+p.categorie+' — Hfst. '+p.hfdst_nr;
+  document.getElementById('dhn').textContent=p.hfdst_nr||'—';
+  document.getElementById('dhl').textContent=p.hfdst_label||'—';
+  document.getElementById('dpc').textContent=p.taric?p.taric.substring(0,4):'—';
+  document.getElementById('dpd').textContent=(p.post||'').replace(/^Post \d+[:\s]*/,'').substring(0,52)||'—';
+  document.getElementById('dgc').textContent=p.taric?p.taric.substring(0,8).replace(/(\d{4})(\d{2})(\d{2})/,'$1 $2 $3'):'—';
+  document.getElementById('dgd').textContent=(p.gn_code||'').replace(/^GN[-‑]code[\s\S]*?:\s*/,'').substring(0,52)||'—';
+  document.getElementById('dtc').textContent=p.taric?p.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4'):'—';
+  const pn=parseFloat(String(p.percentage).replace(',','.'));
+  document.getElementById('dpct').textContent=p.antidump?p.percentage:(p.percentage||'0%');
+  document.getElementById('dpct').style.color=p.antidump?'#4A1A8A':pn===0?'#155E30':pn<8?'#1A3A6B':'#881A1A';
+  document.getElementById('dinv').textContent=p.invoerrechten||'—';
+  document.getElementById('dabox').className='abox'+(p.antidump?' s':'');
+  document.getElementById('dapct').textContent=p.percentage||'';
+  if(p._gewijzigd_door||p._gewijzigd_op){
+    document.getElementById('auditsec').style.display='block';
+    document.getElementById('daudit').textContent='Gewijzigd door: '+(p._gewijzigd_door||'?')+' op '+(p._gewijzigd_op||'?');
+  } else document.getElementById('auditsec').style.display='none';
+  const sim=db.filter(x=>x.id!==id&&x.taric===p.taric).slice(0,4);
+  const ss=document.getElementById('simsec');
+  if(sim.length){ss.style.display='block';document.getElementById('dsim').innerHTML=sim.map(s=>`<div class="si" onclick="showDetail(${s.id})"><span style="font-size:14px">${ICO[s.hfdst_nr]||'📦'}</span><span class="si-n">${s.naam}</span><span class="si-t">${s.taric||''}</span><span class="pb ${pcls(s.percentage,s.antidump)}" style="font-size:10px">${s.antidump?'Anti-dump':s.percentage||'—'}</span></div>`).join('');}
+  else ss.style.display='none';
+  document.getElementById('dc').classList.remove('h');
+}
+function closeDetail(){
+  document.getElementById('dc').classList.add('h');document.getElementById('ep').classList.remove('o');
+  sel=null;editOpen=false;document.querySelectorAll('.pr').forEach(r=>r.classList.remove('a'));
+}
+function toggleEdit(){
+  if(userRole==='sales'){alert('Leesmodus — alleen logistiek kan bewerken.');return;}
+  if(!sel)return;const p=db.find(x=>x.id===sel);if(!p)return;
+  editOpen=!editOpen;const ep=document.getElementById('ep');ep.classList.toggle('o',editOpen);
+  if(editOpen){
+    document.getElementById('enaam').value=p.naam||'';document.getElementById('etaric').value=p.taric||'';
+    document.getElementById('epct').value=p.percentage||'';document.getElementById('einv').value=p.invoerrechten||'';
+    document.getElementById('ehnr').value=p.hfdst_nr||'';document.getElementById('ehl').value=p.hfdst_label||'';
+    document.getElementById('epost').value=p.post||'';document.getElementById('egn').value=p.gn_code||'';
+    document.getElementById('eanti').checked=!!p.antidump;buildCatSelect('ecat',p.categorie);
+    document.getElementById('etst').className='toast';ep.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+async function saveEdit(){
+  if(userRole==='sales')return;if(!sel)return;
+  const i=db.findIndex(x=>x.id===sel);if(i<0)return;
+  const now=new Date().toISOString().split('T')[0];
+  db[i]={...db[i],naam:document.getElementById('enaam').value.trim(),taric:document.getElementById('etaric').value.trim().replace(/\s/g,''),percentage:document.getElementById('epct').value.trim(),invoerrechten:document.getElementById('einv').value.trim(),hfdst_nr:document.getElementById('ehnr').value.trim(),hfdst_label:document.getElementById('ehl').value.trim(),post:document.getElementById('epost').value.trim(),gn_code:document.getElementById('egn').value.trim(),categorie:document.getElementById('ecat').value,antidump:document.getElementById('eanti').checked,_gewijzigd_door:cfg.gebruikersnaam||'logistiek',_gewijzigd_op:now};
+  saveDBLocal();showDetail(sel);renderList();buildCats();
+  showToast('etst','✅ Opgeslagen lokaal','tok');
+  if(cfg.shareUrl)setTimeout(()=>pushToOneDrive(),400);
+}
+async function addProduct(){
+  if(userRole==='sales'){alert('Leesmodus.');return;}
+  const naam=document.getElementById('fnaam').value.trim();if(!naam){alert('Vul artikelomschrijving in.');return;}
+  const now=new Date().toISOString().split('T')[0];
+  db.push({id:Date.now(),naam,taric:document.getElementById('ftaric').value.trim().replace(/\s/g,''),percentage:document.getElementById('fpct').value.trim(),invoerrechten:document.getElementById('finv').value.trim(),hfdst_nr:document.getElementById('fhnr').value.trim(),hfdst_label:document.getElementById('fhl').value.trim(),post:document.getElementById('fpost').value.trim(),gn_code:document.getElementById('fgn').value.trim(),categorie:document.getElementById('fcat').value,antidump:document.getElementById('fanti').checked,_gewijzigd_door:cfg.gebruikersnaam||'logistiek',_gewijzigd_op:now});
+  saveDBLocal();buildCats();renderList();clearAdd();showToast('ftst','✅ Product opgeslagen','tok');
+  if(cfg.shareUrl)setTimeout(()=>pushToOneDrive(),400);
+}
+function delProduct(){
+  if(userRole==='sales')return;if(!sel||!confirm('Product verwijderen?'))return;
+  db=db.filter(x=>x.id!==sel);saveDBLocal();closeDetail();renderList();buildCats();
+  if(cfg.shareUrl)setTimeout(()=>pushToOneDrive(),400);
+}
+function clearAdd(){
+  ['ftaric','fnaam','fpct','finv','fhnr','fhl','fpost','fgn'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('fanti').checked=false;document.getElementById('aidesc').value='';
+  document.getElementById('aires').className='air';document.getElementById('tacdrop').className='tac-drop';
+  document.getElementById('tacfill').className='tac-fill';document.getElementById('inforow').className='info-row';
+}
+function tab(id,btn){
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('a'));if(btn)btn.classList.add('a');
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('a'));document.getElementById(id).classList.add('a');
+}
+// TARIC AUTOCOMPLETE
+function getTaricMap(){const m={};db.forEach(p=>{if(p.taric&&!m[p.taric])m[p.taric]=p;});return m;}
+function onTaricInput(){
+  const val=document.getElementById('ftaric').value.replace(/\s/g,'');
+  const drop=document.getElementById('tacdrop'),fill=document.getElementById('tacfill'),info=document.getElementById('inforow');
+  if(val.length<4){drop.className='tac-drop';fill.className='tac-fill';info.className='info-row';return;}
+  const map=getTaricMap();const matches=Object.values(map).filter(x=>x.taric.startsWith(val));
+  if(val.length===10&&map[val]){drop.className='tac-drop';fillFromTaric(map[val]);return;}
+  if(matches.length&&val.length<10){
+    drop.className='tac-drop s';
+    drop.innerHTML=matches.slice(0,8).map(m=>`<div class="tac-item" onmousedown="event.preventDefault();pickTaric('${m.taric}')"><strong>${m.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4')}</strong><span>${m.percentage} — ${m.naam}</span></div>`).join('');
+  } else drop.className='tac-drop';
+  fill.className='tac-fill';info.className='info-row';
+}
+function pickTaric(t){document.getElementById('ftaric').value=t;document.getElementById('tacdrop').className='tac-drop';const m=getTaricMap();if(m[t])fillFromTaric(m[t]);}
+function fillFromTaric(src){
+  document.getElementById('fpct').value=src.percentage||'';document.getElementById('finv').value=src.invoerrechten||'';
+  document.getElementById('fhnr').value=src.hfdst_nr||'';document.getElementById('fhl').value=src.hfdst_label||'';
+  document.getElementById('fpost').value=src.post||'';document.getElementById('fgn').value=src.gn_code||'';
+  document.getElementById('fanti').checked=!!src.antidump;buildCatSelect('fcat',src.categorie);
+  const fill=document.getElementById('tacfill');
+  fill.textContent='Automatisch ingevuld: '+src.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4')+' ('+src.percentage+')';fill.className='tac-fill s';
+  const info=document.getElementById('inforow');info.innerHTML='Bestaand: <strong>'+src.naam+'</strong>';info.className='info-row s';
+}
+function hideDrop(){setTimeout(()=>{const d=document.getElementById('tacdrop');if(d)d.className='tac-drop';},200);}
+// AI
+async function doAI(){
+  const desc=document.getElementById('aidesc').value.trim();if(!desc)return;
+  const btn=document.getElementById('aibtn');btn.disabled=true;btn.textContent='Bezig';
+  const res=document.getElementById('aires');res.className='air s';res.innerHTML='<span class="ld">HS code bepalen</span>';
+  const sample=db.slice(0,50).map(p=>p.naam+' → '+p.taric+' ('+p.percentage+')').join('\n');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Je bent een Nederlandse douane-expert (TARIC/GN-nomenclatuur EU 2024-2025).\nVoorbeelden:\n${sample}\n\nProduct: "${desc}"\n\nAnalyseer: materiaal, gebruik, hoofdfunctie. Check antidumping (kaarsen 3406, keramiek 6912).\nGeef zekerheidscore 0-100. Onder 80: geef alternatief.\n\nGEEF ALLEEN JSON:\n{"taric":"XXXXXXXXXX","percentage":"X%","invoerrechten":"XXXX XX XX XX = X%","hfdst_nr":"XX","hfdst_label":"...","post":"Post XXXX: ...","gn_code":"GN-code XXXX XX: ...","categorie":"...","antidump":false,"toelichting":"...","confidence":85,"alternatief":null}`}]})});
+    const data=await r.json();
+    let obj;try{obj=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}catch(e){throw new Error('Ongeldige respons');}
+    const fmt=obj.taric?obj.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4'):'—';
+    const conf=obj.confidence||0;
+    const cc=conf>=80?'#155E30':conf>=60?'#7A5500':'#881A1A';
+    const cb=conf>=80?'#EAF7EF':conf>=60?'#FFF8E7':'#FFEBEB';
+    res.innerHTML='<div style="font-size:9px;font-weight:700;color:var(--bl);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">AI-suggestie</div>'
+      +`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px;gap:6px;margin-bottom:8px">`
+      +`<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">TARIC</div><div style="font-family:var(--fm);font-size:12px;font-weight:700;color:var(--nv)">${fmt}</div></div>`
+      +`<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Invoerrechten</div><div style="font-size:14px;font-weight:700;color:var(--nv)">${obj.percentage||'—'}</div></div>`
+      +`<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Categorie</div><div style="font-size:11px;font-weight:600;color:var(--nv)">${obj.categorie||'—'}</div></div>`
+      +`<div style="background:${cb};border:1px solid ${cc}40;border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Zekerheid</div><div style="font-size:14px;font-weight:700;color:${cc}">${conf}%</div></div>`
+      +`</div>`
+      +(obj.toelichting?`<div style="font-size:10px;color:var(--mu);margin-bottom:8px;line-height:1.5">${obj.toelichting}</div>`:'')
+      +(obj.alternatief?`<div style="font-size:10px;background:#FFF8E7;border:1px solid #F0D080;border-radius:6px;padding:7px 9px;margin-bottom:8px;color:#7A5500">⚠️ Alternatief: ${obj.alternatief}</div>`:'')
+      +`<button style="background:var(--or);color:#fff;border:none;padding:6px 13px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600;font-family:var(--f)" onclick='prefill(${JSON.stringify(JSON.stringify(obj))})'>Overnemen in formulier</button>`;
+  }catch(e){res.innerHTML='<span style="color:var(--rd);font-size:12px">Fout: '+e.message+'</span>';}
+  btn.disabled=false;btn.textContent='HS code bepalen';
+}
+function prefill(s){
+  const o=JSON.parse(s);
+  ['ftaric','fnaam','fpct','finv','fhnr','fhl','fpost','fgn'].forEach(id=>{const f=id.replace('f','');const v=o[f]||o[id.substring(1)]||'';const el=document.getElementById(id);if(el)el.value=v;});
+  document.getElementById('ftaric').value=o.taric||'';document.getElementById('fnaam').value=o.naam||'';
+  document.getElementById('fpct').value=o.percentage||'';document.getElementById('finv').value=o.invoerrechten||'';
+  document.getElementById('fhnr').value=o.hfdst_nr||'';document.getElementById('fhl').value=o.hfdst_label||'';
+  document.getElementById('fpost').value=o.post||'';document.getElementById('fgn').value=o.gn_code||'';
+  document.getElementById('fanti').checked=!!o.antidump;buildCatSelect('fcat',o.categorie);
+  const fill=document.getElementById('tacfill');fill.textContent='Ingevuld via AI';fill.className='tac-fill s';
+}
+function kopieerInstructie(){
+  const link=cfg.shareUrl||'[deellink hier plakken]';
+  const tekst=`Hoi! Hier is de HS Code Tool.\n\n1. Open de tool en klik op ⚙ Instellingen\n2. Plak deze deellink: ${link}\n3. Vul je naam in en kies rol "Sales / Management"\n4. Klik Instellingen opslaan\n\nDe tool laadt automatisch de actuele HS-codes.`;
+  navigator.clipboard.writeText(tekst).then(()=>{
+    const t=document.getElementById('kopieertToast');t.style.display='inline';setTimeout(()=>t.style.display='none',2000);
+  });
+}
+// EXPORT
+function exportHTML(){
+  const sm='const SEED=';const cm='const DEFAULT_CATS=';
+  function rb(src,marker,newVal){
+    const s=src.indexOf(marker);if(s<0)return src;
+    let depth=0,inStr=false,esc2=false,i=s+marker.length;
+    while(i<src.length){const c=src[i];if(esc2){esc2=false;}else if(c==='\\'){esc2=true;}else if(!inStr&&c==='['){depth++;}else if(!inStr&&c===']'){depth--;if(depth===0){i++;while(src[i]!==';')i++;return src.substring(0,s)+marker+newVal+';'+src.substring(i+1);}}else if(c==='"'){inStr=!inStr;}i++;}return src;
+  }
+  const cdb=JSON.parse(localStorage.getItem(KEY)||JSON.stringify(SEED));
+  const cca=JSON.parse(localStorage.getItem(CKEY)||JSON.stringify(DEFAULT_CATS));
+  let src=document.documentElement.outerHTML;src=rb(src,sm,JSON.stringify(cdb));src=rb(src,cm,JSON.stringify(cca));
+  const blob=new Blob([src],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  const d=new Date();const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  a.href=url;a.download='dp_factory_hs_tool_'+ds+'.html';a.click();URL.revokeObjectURL(url);
+}
+// INIT
+loadDB();loadConfig();buildCats();renderList();applyRole();
+if(cfg.shareUrl){startAutoSync();}
+else{setSyncStatus('warn','Klik ⚙ om deellink in te stellen');}
+</script>
+</body>
+</html>
