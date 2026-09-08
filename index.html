@@ -266,11 +266,12 @@ textarea:focus{border-color:var(--bl)}
           <div class="cb2"><div class="cb-l">Post (4 cijfers)</div><div class="cb-v" id="dpc">—</div><div class="cb-d" id="dpd">—</div></div>
           <div class="cb2"><div class="cb-l">GN-code (8 cijfers)</div><div class="cb-v" id="dgc">—</div><div class="cb-d" id="dgd">—</div></div>
           <div class="cb2"><div class="cb-l">TARIC (10 cijfers)</div><div class="cb-v" id="dtc">—</div><div class="cb-d">Volledige EU-douanecode</div></div>
+          <div class="cb2"><div class="cb-l">Oorsprong</div><div class="cb-v" id="doors" style="font-size:15px">—</div><div class="cb-d" id="doorsd">Bepaalt het tarief mede</div></div>
         </div>
       </div>
       <div class="sec">
         <div class="st">Invoerrechten</div>
-        <div class="tbox"><div class="tpct" id="dpct">—</div><div><div class="tl">Heffing bij invoer vanuit China</div><div class="td" id="dinv">—</div></div></div>
+        <div class="tbox"><div class="tpct" id="dpct">—</div><div><div class="tl" id="dtl">Heffing bij invoer</div><div class="td" id="dinv">—</div></div></div>
         <div class="abox" id="dabox">
           <div class="aico">⚠️</div>
           <div><div class="at2">Antidumpingrechten van toepassing</div><div class="ad">Basisrecht 0%, totale antidumping-heffing: <strong id="dapct">—</strong>. Verifieer via DTV Douane.</div></div>
@@ -307,7 +308,10 @@ textarea:focus{border-color:var(--bl)}
       </div>
       <div class="fg"><label>Post omschrijving</label><input id="epost"></div>
       <div class="fg"><label>GN-code omschrijving</label><input id="egn"></div>
-      <div class="fg"><label>Categorie</label><select id="ecat"></select></div>
+      <div class="fg2">
+        <div class="fg"><label>Categorie</label><select id="ecat"></select></div>
+        <div class="fg"><label>Land van oorsprong</label><select id="eoors"></select></div>
+      </div>
       <div class="cbr"><input type="checkbox" id="eanti"><label for="eanti">Antidumpingrechten van toepassing</label></div>
       <div class="epb">
         <button class="bs" onclick="saveEdit()">Opslaan</button>
@@ -328,6 +332,10 @@ textarea:focus{border-color:var(--bl)}
     <div class="abb">
       <label style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Beschrijf het product</label>
       <textarea id="aidesc" rows="2" placeholder="bijv. houten lepel voor koken, of pen met pluchen eenhoornfiguur voor kinderen"></textarea>
+      <div class="gr" style="margin-top:8px">
+        <div class="fg"><label>Materiaal (helpt bij de indeling)</label><input id="aimat" placeholder="bijv. bamboe, 100% polyester"></div>
+        <div class="fg"><label>Land van oorsprong *</label><select id="aioors"></select></div>
+      </div>
       <button class="airun" id="aibtn" onclick="doAI()">HS code bepalen</button>
       <div class="air" id="aires"></div>
     </div>
@@ -347,7 +355,11 @@ textarea:focus{border-color:var(--bl)}
       <div class="fg"><label>Artikelomschrijving *</label><input id="fnaam" placeholder="bijv. Pen met pluche eenhoorn"></div>
       <div class="gr">
         <div class="fg"><label>Invoerrechten %</label><input id="fpct" placeholder="4.7%"></div>
+        <div class="fg"><label>Land van oorsprong</label><select id="foors"></select></div>
+      </div>
+      <div class="gr">
         <div class="fg"><label>Categorie</label><select id="fcat"></select></div>
+        <div class="fg"><label>Tarief gecontroleerd op</label><input id="fdatum" placeholder="jjjj-mm-dd" readonly style="background:var(--bg);color:var(--mu)"></div>
       </div>
       <div class="fg"><label>Invoerrechten omschrijving</label><input id="finv" placeholder="9503 00 41 00 = 4.7%"></div>
       <details style="margin-bottom:10px">
@@ -419,6 +431,14 @@ textarea:focus{border-color:var(--bl)}
             <label>Jouw naam (voor wijzigingshistorie)</label>
             <input id="cfgNaam" placeholder="bijv. Agostino">
           </div>
+          <div class="fg">
+            <label>Proxy-URL (voor AI-indeling en tariefcheck)</label>
+            <input id="cfgProxy" placeholder="https://hs-tool-proxy.<jouw-subdomein>.workers.dev">
+          </div>
+          <div class="fg">
+            <label>App-token (alleen als de proxy er een vraagt)</label>
+            <input id="cfgAppToken" type="password" placeholder="laat leeg als de proxy geen token vraagt">
+          </div>
         </div>
       </div>
 
@@ -489,7 +509,17 @@ const DEFAULT_CATS=[{n:'Alle producten',i:'📋'},{n:'Kaarsen & geur',i:'🕯️
 let db=[],cats=[],sel=null,curCat='Alle producten',editOpen=false;
 let userRole='logistiek';
 let syncInterval=null;
-let cfg={owner:'agostinodpf',repo:'Hs-tool',token:'',naam:''};
+let cfg={owner:'agostinodpf',repo:'Hs-tool',token:'',naam:'',proxy:'',apptoken:''};
+// Landen van oorsprong. ISO 3166-1 alpha-2, want dat verwacht TARIC.
+const LANDEN={CN:'China',HK:'Hongkong',TW:'Taiwan',VN:'Vietnam',IN:'India',BD:'Bangladesh',PK:'Pakistan',ID:'Indonesië',TH:'Thailand',MY:'Maleisië',TR:'Turkije',US:'Verenigde Staten',GB:'Verenigd Koninkrijk',DE:'Duitsland',PL:'Polen',CZ:'Tsjechië',IT:'Italië',ES:'Spanje',PT:'Portugal',NL:'Nederland',BE:'België',FR:'Frankrijk',UA:'Oekraïne',MA:'Marokko',TN:'Tunesië',EG:'Egypte'};
+const EU_LIDSTATEN=new Set(['AT','BE','BG','CY','CZ','DE','DK','EE','ES','FI','FR','GR','HR','HU','IE','IT','LT','LU','LV','MT','NL','PL','PT','RO','SE','SI','SK']);
+function buildLandSelect(id,gekozen){
+  const el=document.getElementById(id);if(!el)return;
+  const codes=Object.keys(LANDEN);
+  el.innerHTML='<option value="">— kies land —</option>'+codes.map(c=>`<option value="${c}">${LANDEN[c]} (${c})</option>`).join('');
+  el.value=gekozen&&codes.includes(gekozen)?gekozen:'';
+}
+function landnaam(c){return c?(LANDEN[c]||c):'';}
 const DATA_FILE='hs_codes.json';
 
 // ── CONFIG ──
@@ -500,6 +530,8 @@ function loadConfig(){
   document.getElementById('cfgRepo').value=cfg.repo||'Hs-tool';
   document.getElementById('cfgToken').value=cfg.token||'';
   document.getElementById('cfgNaam').value=cfg.naam||'';
+  document.getElementById('cfgProxy').value=cfg.proxy||'';
+  document.getElementById('cfgAppToken').value=cfg.apptoken||'';
   applyRole();
 }
 function saveConfig(){
@@ -507,6 +539,8 @@ function saveConfig(){
   cfg.repo=document.getElementById('cfgRepo').value.trim();
   cfg.token=document.getElementById('cfgToken').value.trim();
   cfg.naam=document.getElementById('cfgNaam').value.trim();
+  cfg.proxy=document.getElementById('cfgProxy').value.trim().replace(/\/+$/,'');
+  cfg.apptoken=document.getElementById('cfgAppToken').value.trim();
   localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
   localStorage.setItem('dpf_role',userRole);
   showTestResult('✅ Opgeslagen! Verbinding testen...','ok');
@@ -744,6 +778,9 @@ function showDetail(id){
   document.getElementById('dpct').textContent=p.antidump?p.percentage:(p.percentage||'0%');
   document.getElementById('dpct').style.color=p.antidump?'#4A1A8A':pn===0?'#155E30':pn<8?'#1A3A6B':'#881A1A';
   document.getElementById('dinv').textContent=p.invoerrechten||'—';
+  document.getElementById('doors').textContent=p.oorsprong?landnaam(p.oorsprong):'niet vastgelegd';
+  document.getElementById('doorsd').textContent=p.oorsprong?(EU_LIDSTATEN.has(p.oorsprong)?'EU-lidstaat: vrij verkeer':'Bepaalt het tarief mede'):'Zonder oorsprong is het tarief niet te bepalen';
+  document.getElementById('dtl').textContent=p.oorsprong?('Heffing bij invoer vanuit '+landnaam(p.oorsprong)):'Heffing bij invoer — oorsprong onbekend';
   document.getElementById('dabox').className='abox'+(p.antidump?' s':'');
   document.getElementById('dapct').textContent=p.percentage||'';
   if(p._gewijzigd_door||p._gewijzigd_op){
@@ -769,7 +806,7 @@ function toggleEdit(){
     document.getElementById('epct').value=p.percentage||'';document.getElementById('einv').value=p.invoerrechten||'';
     document.getElementById('ehnr').value=p.hfdst_nr||'';document.getElementById('ehl').value=p.hfdst_label||'';
     document.getElementById('epost').value=p.post||'';document.getElementById('egn').value=p.gn_code||'';
-    document.getElementById('eanti').checked=!!p.antidump;buildCatSelect('ecat',p.categorie);
+    document.getElementById('eanti').checked=!!p.antidump;buildCatSelect('ecat',p.categorie);buildLandSelect('eoors',p.oorsprong);
     document.getElementById('etst').className='toast';ep.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
 }
@@ -777,7 +814,7 @@ async function saveEdit(){
   if(userRole==='sales')return;if(!sel)return;
   const i=db.findIndex(x=>x.id===sel);if(i<0)return;
   const now=new Date().toISOString().split('T')[0];
-  db[i]={...db[i],naam:document.getElementById('enaam').value.trim(),taric:document.getElementById('etaric').value.trim().replace(/\s/g,''),percentage:document.getElementById('epct').value.trim(),invoerrechten:document.getElementById('einv').value.trim(),hfdst_nr:document.getElementById('ehnr').value.trim(),hfdst_label:document.getElementById('ehl').value.trim(),post:document.getElementById('epost').value.trim(),gn_code:document.getElementById('egn').value.trim(),categorie:document.getElementById('ecat').value,antidump:document.getElementById('eanti').checked,_gewijzigd_door:cfg.naam||'logistiek',_gewijzigd_op:now};
+  db[i]={...db[i],naam:document.getElementById('enaam').value.trim(),taric:document.getElementById('etaric').value.trim().replace(/\s/g,''),percentage:document.getElementById('epct').value.trim(),invoerrechten:document.getElementById('einv').value.trim(),hfdst_nr:document.getElementById('ehnr').value.trim(),hfdst_label:document.getElementById('ehl').value.trim(),post:document.getElementById('epost').value.trim(),gn_code:document.getElementById('egn').value.trim(),categorie:document.getElementById('ecat').value,oorsprong:document.getElementById('eoors').value,antidump:document.getElementById('eanti').checked,_gewijzigd_door:cfg.naam||'logistiek',_gewijzigd_op:now};
   saveDBLocal();showDetail(sel);renderList();buildCats();
   showToast('etst','✅ Opgeslagen lokaal','tok');
   if(cfg.token)setTimeout(()=>pushToGitHub(),400);
@@ -786,7 +823,7 @@ async function addProduct(){
   if(userRole==='sales'){alert('Leesmodus.');return;}
   const naam=document.getElementById('fnaam').value.trim();if(!naam){alert('Vul artikelomschrijving in.');return;}
   const now=new Date().toISOString().split('T')[0];
-  db.push({id:Date.now(),naam,taric:document.getElementById('ftaric').value.trim().replace(/\s/g,''),percentage:document.getElementById('fpct').value.trim(),invoerrechten:document.getElementById('finv').value.trim(),hfdst_nr:document.getElementById('fhnr').value.trim(),hfdst_label:document.getElementById('fhl').value.trim(),post:document.getElementById('fpost').value.trim(),gn_code:document.getElementById('fgn').value.trim(),categorie:document.getElementById('fcat').value,antidump:document.getElementById('fanti').checked,_gewijzigd_door:cfg.naam||'logistiek',_gewijzigd_op:now});
+  db.push({id:Date.now(),naam,taric:document.getElementById('ftaric').value.trim().replace(/\s/g,''),percentage:document.getElementById('fpct').value.trim(),invoerrechten:document.getElementById('finv').value.trim(),hfdst_nr:document.getElementById('fhnr').value.trim(),hfdst_label:document.getElementById('fhl').value.trim(),post:document.getElementById('fpost').value.trim(),gn_code:document.getElementById('fgn').value.trim(),categorie:document.getElementById('fcat').value,oorsprong:document.getElementById('foors').value,tarief_bron:tariefBron,tarief_datum:document.getElementById('fdatum').value,antidump:document.getElementById('fanti').checked,_gewijzigd_door:cfg.naam||'logistiek',_gewijzigd_op:now});
   saveDBLocal();buildCats();renderList();clearAdd();showToast('ftst','✅ Product opgeslagen','tok');
   if(cfg.token)setTimeout(()=>pushToGitHub(),400);
 }
@@ -796,8 +833,9 @@ function delProduct(){
   if(cfg.token)setTimeout(()=>pushToGitHub(),400);
 }
 function clearAdd(){
-  ['ftaric','fnaam','fpct','finv','fhnr','fhl','fpost','fgn'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['ftaric','fnaam','fpct','finv','fhnr','fhl','fpost','fgn','fdatum','aimat'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('fanti').checked=false;document.getElementById('aidesc').value='';
+  buildLandSelect('foors','');tariefBron='';
   document.getElementById('aires').className='air';document.getElementById('tacdrop').className='tac-drop';
   document.getElementById('tacfill').className='tac-fill';document.getElementById('inforow').className='info-row';
 }
@@ -824,45 +862,115 @@ function fillFromTaric(src){
   document.getElementById('fhnr').value=src.hfdst_nr||'';document.getElementById('fhl').value=src.hfdst_label||'';
   document.getElementById('fpost').value=src.post||'';document.getElementById('fgn').value=src.gn_code||'';
   document.getElementById('fanti').checked=!!src.antidump;buildCatSelect('fcat',src.categorie);
+  buildLandSelect('foors',src.oorsprong);
+  document.getElementById('fdatum').value=src.tarief_datum||'';tariefBron=src.tarief_bron||'';
   const fill=document.getElementById('tacfill');
   fill.textContent='Automatisch ingevuld: '+src.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4')+' ('+src.percentage+')';fill.className='tac-fill s';
   const info=document.getElementById('inforow');info.innerHTML='Bestaand: <strong>'+src.naam+'</strong>';info.className='info-row s';
 }
 function hideDrop(){setTimeout(()=>{const d=document.getElementById('tacdrop');if(d)d.className='tac-drop';},200);}
-async function doAI(){
-  const desc=document.getElementById('aidesc').value.trim();if(!desc)return;
-  const btn=document.getElementById('aibtn');btn.disabled=true;btn.textContent='Bezig';
-  const res=document.getElementById('aires');res.className='air s';res.innerHTML='<span class="ld">HS code bepalen</span>';
-  const sample=db.slice(0,50).map(p=>p.naam+' → '+p.taric+' ('+p.percentage+')').join('\n');
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Je bent een Nederlandse douane-expert (TARIC/GN-nomenclatuur EU 2024-2025).\nVoorbeelden:\n${sample}\n\nProduct: "${desc}"\n\nAnalyseer materiaal, gebruik, functie. Check antidumping (kaarsen 3406, keramiek 6912).\nGeef zekerheidscore 0-100. Onder 80: geef alternatief.\n\nGEEF ALLEEN JSON:\n{"taric":"XXXXXXXXXX","percentage":"X%","invoerrechten":"XXXX XX XX XX = X%","hfdst_nr":"XX","hfdst_label":"...","post":"Post XXXX: ...","gn_code":"GN-code XXXX XX: ...","categorie":"...","antidump":false,"toelichting":"...","confidence":85,"alternatief":null}`}]})});
-    const data=await r.json();
-    let obj;try{obj=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}catch(e){throw new Error('Ongeldige respons');}
-    const fmt=obj.taric?obj.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4'):'—';
-    const conf=obj.confidence||0;
-    const cc=conf>=80?'#155E30':conf>=60?'#7A5500':'#881A1A';
-    const cb=conf>=80?'#EAF7EF':conf>=60?'#FFF8E7':'#FFEBEB';
-    res.innerHTML='<div style="font-size:9px;font-weight:700;color:var(--bl);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">AI-suggestie</div>'
-      +`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px;gap:6px;margin-bottom:8px">`
-      +`<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">TARIC</div><div style="font-family:var(--fm);font-size:12px;font-weight:700;color:var(--nv)">${fmt}</div></div>`
-      +`<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Invoerrechten</div><div style="font-size:14px;font-weight:700;color:var(--nv)">${obj.percentage||'—'}</div></div>`
-      +`<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Categorie</div><div style="font-size:11px;font-weight:600;color:var(--nv)">${obj.categorie||'—'}</div></div>`
-      +`<div style="background:${cb};border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Zekerheid</div><div style="font-size:14px;font-weight:700;color:${cc}">${conf}%</div></div>`
-      +`</div>`
-      +(obj.toelichting?`<div style="font-size:10px;color:var(--mu);margin-bottom:8px;line-height:1.5">${obj.toelichting}</div>`:'')
-      +(obj.alternatief?`<div style="font-size:10px;background:#FFF8E7;border:1px solid #F0D080;border-radius:6px;padding:7px 9px;margin-bottom:8px;color:#7A5500">⚠️ Alternatief: ${obj.alternatief}</div>`:'')
-      +`<button style="background:var(--or);color:#fff;border:none;padding:6px 13px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600;font-family:var(--f)" onclick='prefill(${JSON.stringify(JSON.stringify(obj))})'>Overnemen in formulier</button>`;
-  }catch(e){res.innerHTML='<span style="color:var(--rd);font-size:12px">Fout: '+e.message+'</span>';}
-  btn.disabled=false;btn.textContent='HS code bepalen';
-}
-function prefill(s){
-  const o=JSON.parse(s);
-  document.getElementById('ftaric').value=o.taric||'';document.getElementById('fnaam').value=o.naam||'';
-  document.getElementById('fpct').value=o.percentage||'';document.getElementById('finv').value=o.invoerrechten||'';
+// Laatste AI-resultaat, zodat "Overnemen" niet als JSON-string door een
+// onclick-attribuut hoeft te reizen.
+let laatsteSuggestie=null;
+// Waar het percentage in het formulier vandaan komt: 'DDS2', 'regelgeving EU-intern', ...
+let tariefBron='';
+
+// esc() hierboven is voor attributen; dit is voor tekst die in innerHTML belandt.
+function escH(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function prefillLaatste(){
+  if(!laatsteSuggestie)return;
+  const o=laatsteSuggestie.indeling,t=laatsteSuggestie.tarief,oorsprong=laatsteSuggestie.oorsprong;
+  document.getElementById('ftaric').value=o.taric||'';
+  if(!document.getElementById('fnaam').value.trim())document.getElementById('fnaam').value=document.getElementById('aidesc').value.trim();
   document.getElementById('fhnr').value=o.hfdst_nr||'';document.getElementById('fhl').value=o.hfdst_label||'';
   document.getElementById('fpost').value=o.post||'';document.getElementById('fgn').value=o.gn_code||'';
-  document.getElementById('fanti').checked=!!o.antidump;buildCatSelect('fcat',o.categorie);
-  const fill=document.getElementById('tacfill');fill.textContent='Ingevuld via AI';fill.className='tac-fill s';
+  document.getElementById('fanti').checked=!!o.antidump_risico;
+  buildCatSelect('fcat',o.categorie);buildLandSelect('foors',oorsprong);
+  // Een percentage komt alleen uit een bron, nooit uit het model.
+  const heeftTarief=!!(t&&(t.status==='gevonden'||t.status==='eu_intern')&&t.percentage);
+  document.getElementById('fpct').value=heeftTarief?t.percentage:'';
+  document.getElementById('finv').value=heeftTarief
+    ?(o.taric||'').replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4')+' = '+t.percentage:'';
+  document.getElementById('fdatum').value=heeftTarief?(t.geldig_op||''):'';
+  tariefBron=heeftTarief?(t.bron||''):'';
+  const fill=document.getElementById('tacfill');
+  fill.textContent=heeftTarief
+    ?'Code via AI, tarief via '+t.bron+' ('+t.geldig_op+')'
+    :'Code via AI ingevuld — vul het tarief zelf in na controle in DDS2';
+  fill.className='tac-fill '+(heeftTarief?'s':'');
+}
+
+// Alle serverwerk loopt via de proxy: de sleutels staan daar, niet hier.
+async function proxyFetch(pad,opties){
+  if(!cfg.proxy)throw new Error('Geen proxy-URL ingesteld. Ga naar ⚙ Instellingen.');
+  const o=opties||{};o.headers=Object.assign({},o.headers||{});
+  if(cfg.apptoken)o.headers['X-App-Token']=cfg.apptoken;
+  const r=await fetch(cfg.proxy+pad,o);
+  let data;
+  try{data=await r.json();}catch(e){throw new Error('Proxy gaf geen leesbaar antwoord (status '+r.status+').');}
+  if(!r.ok)throw new Error(data.fout||('Proxy gaf status '+r.status+'.'));
+  return data;
+}
+
+function tariefBlok(t){
+  if(!t)return '';
+  const kleur={gevonden:'#155E30',eu_intern:'#155E30',handmatig:'#7A5500',fout:'#881A1A'}[t.status]||'#7A5500';
+  const bg={gevonden:'#EAF7EF',eu_intern:'#EAF7EF',handmatig:'#FFF8E7',fout:'#FFEBEB'}[t.status]||'#FFF8E7';
+  const herkomst=t.bron?(t.bron+' — geldig op '+(t.geldig_op||'')):'nog geen bron aangesloten';
+  return '<div style="background:'+bg+';border-radius:6px;padding:8px 10px;margin-bottom:8px">'
+    +'<div style="display:flex;align-items:baseline;gap:8px">'
+    +'<div style="font-size:16px;font-weight:700;color:'+kleur+'">'+escH(t.percentage||'onbekend')+'</div>'
+    +'<div style="font-size:10px;color:var(--mu)">'+escH(herkomst)+'</div></div>'
+    +'<div style="font-size:10px;color:var(--mu);margin-top:4px;line-height:1.5">'+escH(t.toelichting)+'</div>'
+    +(t.dds2_url?'<a href="'+encodeURI(t.dds2_url)+'" target="_blank" rel="noopener" style="font-size:10px;color:var(--bl);font-weight:600">Controleer in DDS2 →</a>':'')
+    +'</div>';
+}
+
+async function doAI(){
+  const desc=document.getElementById('aidesc').value.trim();
+  const oorsprong=document.getElementById('aioors').value;
+  const res=document.getElementById('aires');
+  const meld=m=>{res.className='air s';res.innerHTML='<span style="color:var(--rd);font-size:12px">'+escH(m)+'</span>';};
+  if(!desc)return meld('Beschrijf eerst het product.');
+  if(!oorsprong)return meld('Kies een land van oorsprong — zonder oorsprong is het invoerrecht niet te bepalen.');
+  const btn=document.getElementById('aibtn');btn.disabled=true;btn.textContent='Bezig';
+  res.className='air s';res.innerHTML='<span class="ld">HS code bepalen</span>';
+  try{
+    const data=await proxyFetch('/api/classify',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({omschrijving:desc,materiaal:document.getElementById('aimat').value.trim(),oorsprong:oorsprong})
+    });
+    const o=data.indeling;
+    // Tarief apart ophalen, zodat een trage of kapotte tariefbron de indeling niet blokkeert.
+    res.innerHTML='<span class="ld">Invoerrecht opzoeken</span>';
+    let t=null;
+    try{t=await proxyFetch(data.tarief_endpoint);}
+    catch(e){t={status:'fout',percentage:null,bron:null,geldig_op:'',dds2_url:data.dds2_url,
+                toelichting:'Tarief ophalen mislukt: '+e.message};}
+    laatsteSuggestie={indeling:o,tarief:t,oorsprong:data.oorsprong};
+
+    const fmt=o.taric?o.taric.replace(/(\d{4})(\d{2})(\d{2})(\d{2})/,'$1 $2 $3 $4'):'—';
+    const conf=o.confidence||0;
+    const cc=conf>=80?'#155E30':conf>=60?'#7A5500':'#881A1A';
+    const cb=conf>=80?'#EAF7EF':conf>=60?'#FFF8E7':'#FFEBEB';
+    const land=landnaam(data.oorsprong);
+    res.innerHTML='<div style="font-size:9px;font-weight:700;color:var(--bl);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">AI-suggestie — indeling</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;margin-bottom:8px">'
+      +'<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">TARIC</div><div style="font-family:var(--fm);font-size:12px;font-weight:700;color:var(--nv)">'+escH(fmt)+'</div></div>'
+      +'<div style="background:var(--wh);border:1px solid var(--bo);border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Categorie</div><div style="font-size:11px;font-weight:600;color:var(--nv)">'+escH(o.categorie||'—')+'</div></div>'
+      +'<div style="background:'+cb+';border-radius:6px;padding:7px 9px"><div style="font-size:9px;color:var(--mu);font-weight:500;margin-bottom:2px">Zekerheid</div><div style="font-size:14px;font-weight:700;color:'+cc+'">'+conf+'%</div></div>'
+      +'</div>'
+      +(o.redenering?'<div style="font-size:10px;color:var(--mu);margin-bottom:8px;line-height:1.5">'+escH(o.redenering)+'</div>':'')
+      +(o.alternatief?'<div style="font-size:10px;background:#FFF8E7;border:1px solid #F0D080;border-radius:6px;padding:7px 9px;margin-bottom:8px;color:#7A5500">⚠️ Alternatief: '+escH(o.alternatief)+'</div>':'')
+      +(o.antidump_risico?'<div style="font-size:10px;background:#F3EAFB;border:1px solid #C9A8E8;border-radius:6px;padding:7px 9px;margin-bottom:8px;color:#4A1A8A">⚠️ Mogelijk antidumpingrecht op deze code vanuit '+escH(land)+'. Verifieer dit expliciet.</div>':'')
+      +'<div style="font-size:9px;font-weight:700;color:var(--bl);letter-spacing:.6px;text-transform:uppercase;margin:10px 0 6px">Invoerrecht — '+escH(land)+'</div>'
+      +tariefBlok(t)
+      +'<button style="background:var(--or);color:#fff;border:none;padding:6px 13px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600;font-family:var(--f)" onclick="prefillLaatste()">Overnemen in formulier</button>';
+  }catch(e){
+    meld('Fout: '+e.message);
+  }
+  btn.disabled=false;btn.textContent='HS code bepalen';
 }
 function kopieerInstructie(){
   const tekst=`Hoi! De HS Code Tool is beschikbaar op:\nhttps://agostinodpf.github.io/Hs-tool/\n\n1. Open de link in je browser\n2. Klik op ⚙ Instellingen\n3. Gebruikersnaam: agostinodpf — Repository: Hs-tool\n4. Token: leeglaten\n5. Kies rol Sales / Management\n6. Klik Instellingen opslaan`;
@@ -871,7 +979,7 @@ function kopieerInstructie(){
   });
 }
 // INIT
-loadDB();loadConfig();buildCats();renderList();applyRole();
+loadDB();loadConfig();buildCats();renderList();applyRole();buildLandSelect('aioors','CN');buildLandSelect('foors','');
 startAutoSync();
 </script>
 </body>

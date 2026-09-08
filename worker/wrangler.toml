@@ -1,0 +1,17 @@
+name = "hs-tool-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Komma-gescheiden lijst van sites die de proxy mogen aanroepen.
+ALLOWED_ORIGINS = "https://agostinodpf.github.io,http://localhost:8080"
+
+# Tariefbron. "geen" = alleen een deeplink naar DDS2 teruggeven (veilige stand,
+# zolang tools/dds2_probe.py niet heeft aangetoond dat scrapen betrouwbaar is).
+# "dds2" = de DDS2-pagina uitlezen. Zet dit pas om na een geslaagde probe.
+TARIEF_BRON = "geen"
+
+# Secrets (NIET hier invullen -- zet ze met wrangler secret put):
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler secret put APP_TOKEN
