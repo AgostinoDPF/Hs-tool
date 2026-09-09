@@ -1,3 +1,4 @@
 tools/dds2_probe_out/
 worker/node_modules/
 worker/.wrangler/
+tools/douane_api_uit/
